@@ -1,0 +1,36 @@
+14:37:20.477 [nRepl-session-94935c5b-8909-4e58-8440-4827a919d572] INFO  c.l.m.s.ConfigUtils - MyLive read configuration as : MyLiveConfig(rtmpPort=1935, httpFlvPort=8080, saveFlvFile=true, saveFlVFilePath=/home/crosstyan/Code/MyLive/flv, handlerThreadPoolSize=8, enableHttpFlv=true)
+14:40:37.712 [nRepl-session-94935c5b-8909-4e58-8440-4827a919d572] INFO  c.l.m.s.ConfigUtils - MyLive read configuration as : MyLiveConfig(rtmpPort=1935, httpFlvPort=8080, saveFlvFile=true, saveFlVFilePath=/home/crosstyan/Code/MyLive/flv, handlerThreadPoolSize=8, enableHttpFlv=true)
+14:41:22.071 [nRepl-session-94935c5b-8909-4e58-8440-4827a919d572] INFO  c.l.m.s.ConfigUtils - MyLive read configuration as : MyLiveConfig(rtmpPort=1935, httpFlvPort=8080, saveFlvFile=true, saveFlVFilePath=/home/crosstyan/Code/MyLive/flv, handlerThreadPoolSize=8, enableHttpFlv=true)
+14:42:52.677 [nRepl-session-2d15d755-5814-44bc-8ba3-e59a3ac8c54b] INFO  c.l.m.s.ConfigUtils - MyLive read configuration as : MyLiveConfig(rtmpPort=1935, httpFlvPort=8080, saveFlvFile=true, saveFlVFilePath=/home/crosstyan/Code/MyLive/flv, handlerThreadPoolSize=8, enableHttpFlv=true)
+14:42:52.791 [nRepl-session-2d15d755-5814-44bc-8ba3-e59a3ac8c54b] INFO  c.l.m.s.RTMPServer - RTMP Server start , listen at :1935
+14:42:52.793 [nRepl-session-2d15d755-5814-44bc-8ba3-e59a3ac8c54b] INFO  c.l.m.s.HttpFlvServer - HttpFlv server start , listen at :8080
+14:45:32.734 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ConnectionAdapter - channel active:/127.0.0.1:50992
+14:45:32.754 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}])
+14:45:32.754 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - client connect RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}]) 
+14:45:32.756 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ChunkEncoder - chunksize in encoder changed to:5000
+14:45:32.757 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[releaseStream, 2.0, null, test])
+14:45:32.757 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[FCPublish, 3.0, null, test])
+14:45:32.757 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[createStream, 4.0, null])
+14:45:32.758 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - create stream received : RtmpCommandMessage(command=[createStream, 4.0, null])
+14:45:32.758 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[publish, 5.0, null, test, live])
+14:45:32.758 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - publish :RtmpCommandMessage(command=[publish, 5.0, null, test, live])
+14:45:32.760 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpDataMessage(data=[@setDataFrame, onMetaData, {videocodecid=7.0, width=384.0, height=216.0, AspectRatioX=1.0, AspectRatioY=1.0, framerate=5.0, videodatarate=2048.0, metadatacreator=GStreamer 1.20.1 FLV muxer, encoder=GStreamer 1.20.1 FLV muxer, creationdate=Tue Apr 26 06:45:32 2022}])
+14:45:32.760 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.e.Stream - avcDecoderConfigurationRecord  ok
+14:45:32.760 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.e.Stream - Metadata:{videocodecid=7.0, width=384.0, height=216.0, AspectRatioX=1.0, AspectRatioY=1.0, framerate=5.0, videodatarate=2048.0, metadatacreator=GStreamer 1.20.1 FLV muxer, encoder=GStreamer 1.20.1 FLV muxer, creationdate=Tue Apr 26 06:45:32 2022}
+14:48:02.052 [nioEventLoopGroup-2-3] INFO  c.l.m.s.h.ConnectionAdapter - channel active:/[0:0:0:0:0:0:0:1]:60002
+14:48:02.060 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[connect, 1.0, {app=live, flashVer=LNX 9,0,124,2, tcUrl=rtmp://localhost:1935/live, fpad=false, capabilities=15.0, audioCodecs=4071.0, videoCodecs=252.0, videoFunction=1.0}])
+14:48:02.060 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.h.RtmpMessageHandler - client connect RtmpCommandMessage(command=[connect, 1.0, {app=live, flashVer=LNX 9,0,124,2, tcUrl=rtmp://localhost:1935/live, fpad=false, capabilities=15.0, audioCodecs=4071.0, videoCodecs=252.0, videoFunction=1.0}]) 
+14:48:02.061 [nioEventLoopGroup-2-3] INFO  c.l.m.s.h.ChunkEncoder - chunksize in encoder changed to:5000
+14:48:02.062 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : WindowAcknowledgementSize(windowSize=5000000)
+14:48:02.062 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[createStream, 2.0, null])
+14:48:02.062 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.h.RtmpMessageHandler - create stream received : RtmpCommandMessage(command=[createStream, 2.0, null])
+14:48:02.062 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[getStreamLength, 3.0, null, test])
+14:48:02.063 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[play, 4.0, null, test, -2000.0])
+14:48:02.063 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.e.Stream - subscriber : [id: 0x74fb2128, L:/[0:0:0:0:0:0:0:1]:1935 - R:/[0:0:0:0:0:0:0:1]:60002] is added to stream :StreamName(app=live, name=test, obsClient=false)
+14:48:02.067 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.e.Stream - avcDecoderConfigurationRecord:VideoMessage [timestampDelta=0, timestamp=147200, inboundHeaderLength=12, inboundBodyLength=50]
+14:48:02.067 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : UserControlMessageEvent(eventType=3, data=5)
+14:49:24.903 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ConnectionAdapter - channel inactive:/127.0.0.1:50992
+14:49:24.905 [nioEventLoopGroup-2-3] INFO  c.l.m.s.h.ConnectionAdapter - channel inactive:/[0:0:0:0:0:0:0:1]:60002
+14:58:24.523 [nRepl-session-c5b962f3-a368-4b86-8cb9-8547941ee298] INFO  c.l.m.s.ConfigUtils - MyLive read configuration as : MyLiveConfig(rtmpPort=1935, httpFlvPort=8080, saveFlvFile=true, saveFlVFilePath=/home/crosstyan/Code/MyLive/flv, handlerThreadPoolSize=8, enableHttpFlv=true)
+14:58:24.637 [nRepl-session-c5b962f3-a368-4b86-8cb9-8547941ee298] INFO  c.l.m.s.RTMPServer - RTMP Server start , listen at :1935
+14:58:24.638 [nRepl-session-c5b962f3-a368-4b86-8cb9-8547941ee298] INFO  c.l.m.s.HttpFlvServer - HttpFlv server start , listen at :8080

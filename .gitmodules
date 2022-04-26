@@ -1,0 +1,3 @@
+[submodule "deps/MyLive"]
+	path = deps/MyLive
+	url = https://github.com/crosstyan/MyLive
