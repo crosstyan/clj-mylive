@@ -34,3 +34,438 @@
 14:58:24.523 [nRepl-session-c5b962f3-a368-4b86-8cb9-8547941ee298] INFO  c.l.m.s.ConfigUtils - MyLive read configuration as : MyLiveConfig(rtmpPort=1935, httpFlvPort=8080, saveFlvFile=true, saveFlVFilePath=/home/crosstyan/Code/MyLive/flv, handlerThreadPoolSize=8, enableHttpFlv=true)
 14:58:24.637 [nRepl-session-c5b962f3-a368-4b86-8cb9-8547941ee298] INFO  c.l.m.s.RTMPServer - RTMP Server start , listen at :1935
 14:58:24.638 [nRepl-session-c5b962f3-a368-4b86-8cb9-8547941ee298] INFO  c.l.m.s.HttpFlvServer - HttpFlv server start , listen at :8080
+20:37:15.688 [nRepl-session-4f51ea25-5a9b-4fba-bba5-0890dd31bfb9] INFO  c.l.m.s.ConfigUtils - MyLive read configuration as : MyLiveConfig(rtmpPort=1935, httpFlvPort=8080, saveFlvFile=true, saveFlVFilePath=/home/crosstyan/Code/MyLive/flv, handlerThreadPoolSize=8, enableHttpFlv=true)
+20:37:15.703 [nRepl-session-4f51ea25-5a9b-4fba-bba5-0890dd31bfb9] INFO  c.l.m.s.RTMPServer - RTMP Server start , listen at :1935
+20:37:15.705 [nRepl-session-4f51ea25-5a9b-4fba-bba5-0890dd31bfb9] INFO  c.l.m.s.HttpFlvServer - HttpFlv server start , listen at :8080
+21:42:27.963 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ConnectionAdapter - channel active:/127.0.0.1:50994
+21:42:27.991 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}])
+21:42:27.991 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - client connect RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}]) 
+21:42:27.992 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ConnectionAdapter - channel inactive:/127.0.0.1:50994
+21:42:27.993 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@730a6c6c
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:497)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:42:27.994 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@6d73e7da
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:497)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:42:27.994 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ChunkEncoder - chunksize in encoder changed to:5000
+21:42:27.994 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@2886c11c
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:497)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:42:27.994 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@79746ee3
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:497)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:43:18.001 [nioEventLoopGroup-2-3] INFO  c.l.m.s.h.ConnectionAdapter - channel active:/127.0.0.1:50996
+21:43:18.008 [nioEventLoopGroup-2-3] INFO  c.l.m.s.h.ConnectionAdapter - channel inactive:/127.0.0.1:50996
+21:43:18.009 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}])
+21:43:18.009 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.h.RtmpMessageHandler - client connect RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}]) 
+21:43:18.010 [nioEventLoopGroup-2-3] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@71420459
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:43:18.010 [nioEventLoopGroup-2-3] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@34409415
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:43:18.010 [nioEventLoopGroup-2-3] INFO  c.l.m.s.h.ChunkEncoder - chunksize in encoder changed to:5000
+21:43:18.010 [nioEventLoopGroup-2-3] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@1c2b6693
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:43:18.011 [nioEventLoopGroup-2-3] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@5be07d6
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:43:58.730 [nRepl-session-532ec16c-b2bd-4bea-b8bf-b022ed02fe85] INFO  c.l.m.s.ConfigUtils - MyLive read configuration as : MyLiveConfig(rtmpPort=1935, httpFlvPort=8080, saveFlvFile=true, saveFlVFilePath=/home/crosstyan/Code/MyLive/flv, handlerThreadPoolSize=8, enableHttpFlv=true)
+21:43:58.746 [nRepl-session-532ec16c-b2bd-4bea-b8bf-b022ed02fe85] INFO  c.l.m.s.RTMPServer - RTMP Server start , listen at :1935
+21:43:58.748 [nRepl-session-532ec16c-b2bd-4bea-b8bf-b022ed02fe85] INFO  c.l.m.s.HttpFlvServer - HttpFlv server start , listen at :8080
+21:44:12.472 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ConnectionAdapter - channel active:/127.0.0.1:50998
+21:44:12.494 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}])
+21:44:12.494 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - client connect RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}]) 
+21:44:12.494 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ConnectionAdapter - channel inactive:/127.0.0.1:50998
+21:44:12.496 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@3fd6ddb
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:497)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:44:12.497 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@5d57277
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:497)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:44:12.497 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ChunkEncoder - chunksize in encoder changed to:5000
+21:44:12.497 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@ef82fc
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:497)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:44:12.497 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@58f815f3
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:497)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:45:16.109 [main] INFO  c.l.m.s.ConfigUtils - MyLive read configuration as : MyLiveConfig(rtmpPort=1935, httpFlvPort=8080, saveFlvFile=true, saveFlVFilePath=/home/crosstyan/Code/MyLive/flv, handlerThreadPoolSize=8, enableHttpFlv=true)
+21:45:16.195 [main] INFO  c.l.m.s.RTMPServer - RTMP Server start , listen at :1935
+21:45:16.196 [main] INFO  c.l.m.s.HttpFlvServer - HttpFlv server start , listen at :8080
+21:45:33.044 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ConnectionAdapter - channel active:/127.0.0.1:51000
+21:45:33.072 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}])
+21:45:33.072 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - client connect RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}]) 
+21:45:33.072 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ConnectionAdapter - channel inactive:/127.0.0.1:51000
+21:45:33.074 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@1bc322b9
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:45:33.074 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@539549de
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:45:33.074 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ChunkEncoder - chunksize in encoder changed to:5000
+21:45:33.074 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@4915a994
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:45:33.075 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@3e67b088
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:50:04.204 [main] INFO  c.l.m.s.ConfigUtils - MyLive read configuration as : MyLiveConfig(rtmpPort=1935, httpFlvPort=8080, saveFlvFile=true, saveFlVFilePath=/home/crosstyan/Code/MyLive/flv, handlerThreadPoolSize=8, enableHttpFlv=true)
+21:50:22.542 [main] INFO  c.l.m.s.ConfigUtils - MyLive read configuration as : MyLiveConfig(rtmpPort=1935, httpFlvPort=8080, saveFlvFile=true, saveFlVFilePath=/home/crosstyan/Code/MyLive/flv, handlerThreadPoolSize=8, enableHttpFlv=true)
+21:50:22.707 [main] INFO  c.l.m.s.RTMPServer - RTMP Server start , listen at :1935
+21:50:22.713 [main] INFO  c.l.m.s.HttpFlvServer - HttpFlv server start , listen at :8080
+21:50:40.797 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ConnectionAdapter - channel active:/127.0.0.1:51004
+21:50:40.831 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}])
+21:50:40.831 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - client connect RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}]) 
+21:50:40.831 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ConnectionAdapter - channel inactive:/127.0.0.1:51004
+21:50:40.833 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@54aa9fb4
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:497)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:50:40.833 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@48242fc3
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:497)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:50:40.833 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ChunkEncoder - chunksize in encoder changed to:5000
+21:50:40.834 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@918be29
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:497)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:50:40.834 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@707d5974
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:497)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:58:10.700 [clojure-agent-send-off-pool-0] INFO  c.l.m.s.ConfigUtils - MyLive read configuration as : MyLiveConfig(rtmpPort=1935, httpFlvPort=8080, saveFlvFile=true, saveFlVFilePath=/home/crosstyan/Code/MyLive/flv, handlerThreadPoolSize=8, enableHttpFlv=true)
+21:58:10.864 [clojure-agent-send-off-pool-0] INFO  c.l.m.s.RTMPServer - RTMP Server start , listen at :1935
+21:58:10.872 [clojure-agent-send-off-pool-0] INFO  c.l.m.s.HttpFlvServer - HttpFlv server start , listen at :8080
+21:58:30.289 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ConnectionAdapter - channel active:/127.0.0.1:51006
+21:58:30.312 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}])
+21:58:30.312 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - client connect RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}]) 
+21:58:30.313 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ConnectionAdapter - channel inactive:/127.0.0.1:51006
+21:58:30.314 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@d5bbf77
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:58:30.315 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@5080913a
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:58:30.315 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ChunkEncoder - chunksize in encoder changed to:5000
+21:58:30.315 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@2764c0ce
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+21:58:30.316 [nioEventLoopGroup-2-2] WARN  i.n.u.c.AbstractEventExecutor - A task raised an exception. Task: io.netty.channel.AbstractChannelHandlerContext$WriteTask@40473cec
+java.lang.IncompatibleClassChangeError: Class io.netty.util.Recycler$DefaultHandle does not implement the requested interface io.netty.util.internal.ObjectPool$Handle
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.recycle(AbstractChannelHandlerContext.java:1097)
+	at io.netty.channel.AbstractChannelHandlerContext$WriteTask.run(AbstractChannelHandlerContext.java:1074)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:163)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:510)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:500)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$6.run(SingleThreadEventExecutor.java:1050)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+22:08:55.134 [clojure-agent-send-off-pool-0] INFO  c.l.m.s.ConfigUtils - MyLive read configuration as : MyLiveConfig(rtmpPort=1935, httpFlvPort=8080, saveFlvFile=true, saveFlVFilePath=/home/crosstyan/Code/MyLive/flv, handlerThreadPoolSize=8, enableHttpFlv=true)
+22:08:55.332 [clojure-agent-send-off-pool-0] INFO  c.l.m.s.RTMPServer - RTMP Server start , listen at :1935
+22:08:55.344 [clojure-agent-send-off-pool-0] INFO  c.l.m.s.HttpFlvServer - HttpFlv server start , listen at :8080
+22:09:01.887 [clojure-agent-send-off-pool-3] INFO  c.l.m.s.ConfigUtils - MyLive read configuration as : MyLiveConfig(rtmpPort=1935, httpFlvPort=8080, saveFlvFile=true, saveFlVFilePath=/home/crosstyan/Code/MyLive/flv, handlerThreadPoolSize=8, enableHttpFlv=true)
+22:09:46.782 [nRepl-session-77a2b394-099c-4fe0-9d91-ec219cbab8ef] INFO  c.l.m.s.ConfigUtils - MyLive read configuration as : MyLiveConfig(rtmpPort=1935, httpFlvPort=8080, saveFlvFile=true, saveFlVFilePath=/home/crosstyan/Code/MyLive/flv, handlerThreadPoolSize=8, enableHttpFlv=true)
+22:09:46.798 [nRepl-session-77a2b394-099c-4fe0-9d91-ec219cbab8ef] INFO  c.l.m.s.RTMPServer - RTMP Server start , listen at :1935
+22:09:46.800 [nRepl-session-77a2b394-099c-4fe0-9d91-ec219cbab8ef] INFO  c.l.m.s.HttpFlvServer - HttpFlv server start , listen at :8080
+22:10:03.089 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ConnectionAdapter - channel active:/127.0.0.1:51008
+22:10:03.118 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}])
+22:10:03.118 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - client connect RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}]) 
+22:10:03.120 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ChunkEncoder - chunksize in encoder changed to:5000
+22:10:03.121 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[releaseStream, 2.0, null, test])
+22:10:03.121 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[FCPublish, 3.0, null, test])
+22:10:03.121 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[createStream, 4.0, null])
+22:10:03.122 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - create stream received : RtmpCommandMessage(command=[createStream, 4.0, null])
+22:10:03.122 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[publish, 5.0, null, test, live])
+22:10:03.122 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - publish :RtmpCommandMessage(command=[publish, 5.0, null, test, live])
+22:10:03.124 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpDataMessage(data=[@setDataFrame, onMetaData, {videocodecid=7.0, width=384.0, height=216.0, AspectRatioX=1.0, AspectRatioY=1.0, framerate=5.0, videodatarate=2048.0, metadatacreator=GStreamer 1.20.1 FLV muxer, encoder=GStreamer 1.20.1 FLV muxer, creationdate=Tue Apr 26 14:10:03 2022}])
+22:10:03.124 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.e.Stream - avcDecoderConfigurationRecord  ok
+22:10:03.124 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.e.Stream - Metadata:{videocodecid=7.0, width=384.0, height=216.0, AspectRatioX=1.0, AspectRatioY=1.0, framerate=5.0, videodatarate=2048.0, metadatacreator=GStreamer 1.20.1 FLV muxer, encoder=GStreamer 1.20.1 FLV muxer, creationdate=Tue Apr 26 14:10:03 2022}
+22:10:57.829 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ConnectionAdapter - channel inactive:/127.0.0.1:51008
+22:19:20.130 [nRepl-session-031b94b1-db6e-47ef-9355-c2b7a385c776] INFO  c.l.m.s.ConfigUtils - MyLive read configuration as : MyLiveConfig(rtmpPort=1935, httpFlvPort=8080, saveFlvFile=true, saveFlVFilePath=/home/crosstyan/Code/MyLive/flv, handlerThreadPoolSize=8, enableHttpFlv=true)
+22:19:20.146 [nRepl-session-031b94b1-db6e-47ef-9355-c2b7a385c776] INFO  c.l.m.s.RTMPServer - RTMP Server start , listen at :1935
+22:19:20.147 [nRepl-session-031b94b1-db6e-47ef-9355-c2b7a385c776] INFO  c.l.m.s.HttpFlvServer - HttpFlv server start , listen at :8080
+22:20:18.230 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ConnectionAdapter - channel active:/127.0.0.1:51012
+22:20:18.250 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}])
+22:20:18.251 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - client connect RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}]) 
+22:20:18.254 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ChunkEncoder - chunksize in encoder changed to:5000
+22:20:18.255 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[releaseStream, 2.0, null, test])
+22:20:18.255 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[FCPublish, 3.0, null, test])
+22:20:18.255 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[createStream, 4.0, null])
+22:20:18.255 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - create stream received : RtmpCommandMessage(command=[createStream, 4.0, null])
+22:20:18.256 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[publish, 5.0, null, test, live])
+22:20:18.256 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - publish :RtmpCommandMessage(command=[publish, 5.0, null, test, live])
+22:20:18.258 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpDataMessage(data=[@setDataFrame, onMetaData, {videocodecid=7.0, width=384.0, height=216.0, AspectRatioX=1.0, AspectRatioY=1.0, framerate=5.0, videodatarate=2048.0, metadatacreator=GStreamer 1.20.1 FLV muxer, encoder=GStreamer 1.20.1 FLV muxer, creationdate=Tue Apr 26 14:20:18 2022}])
+22:20:18.258 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.e.Stream - avcDecoderConfigurationRecord  ok
+22:20:18.258 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.e.Stream - Metadata:{videocodecid=7.0, width=384.0, height=216.0, AspectRatioX=1.0, AspectRatioY=1.0, framerate=5.0, videodatarate=2048.0, metadatacreator=GStreamer 1.20.1 FLV muxer, encoder=GStreamer 1.20.1 FLV muxer, creationdate=Tue Apr 26 14:20:18 2022}
+22:20:42.780 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ConnectionAdapter - channel inactive:/127.0.0.1:51012
+22:45:45.190 [nRepl-session-1a6702ec-04e9-4204-9288-7f2c8f55f3b6] INFO  c.l.m.s.ConfigUtils - MyLive read configuration as : MyLiveConfig(rtmpPort=1935, httpFlvPort=8080, saveFlvFile=true, saveFlVFilePath=/home/crosstyan/Code/MyLive/flv, handlerThreadPoolSize=8, enableHttpFlv=true)
+22:45:45.206 [nRepl-session-1a6702ec-04e9-4204-9288-7f2c8f55f3b6] INFO  c.l.m.s.RTMPServer - RTMP Server start , listen at :1935
+22:45:45.207 [nRepl-session-1a6702ec-04e9-4204-9288-7f2c8f55f3b6] INFO  c.l.m.s.HttpFlvServer - HttpFlv server start , listen at :8080
+22:50:05.279 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ConnectionAdapter - channel active:/127.0.0.1:51014
+22:50:05.307 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}])
+22:50:05.307 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - client connect RtmpCommandMessage(command=[connect, 1.0, {app=live, type=nonprivate, tcUrl=rtmp://localhost:1935/live}]) 
+22:50:05.309 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ChunkEncoder - chunksize in encoder changed to:5000
+22:50:05.310 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[releaseStream, 2.0, null, test])
+22:50:05.310 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[FCPublish, 3.0, null, test])
+22:50:05.311 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[createStream, 4.0, null])
+22:50:05.311 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - create stream received : RtmpCommandMessage(command=[createStream, 4.0, null])
+22:50:05.311 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[publish, 5.0, null, test, live])
+22:50:05.311 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - publish :RtmpCommandMessage(command=[publish, 5.0, null, test, live])
+22:50:05.313 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpDataMessage(data=[@setDataFrame, onMetaData, {videocodecid=7.0, width=384.0, height=216.0, AspectRatioX=1.0, AspectRatioY=1.0, framerate=5.0, videodatarate=2048.0, metadatacreator=GStreamer 1.20.1 FLV muxer, encoder=GStreamer 1.20.1 FLV muxer, creationdate=Tue Apr 26 14:50:05 2022}])
+22:50:05.313 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.e.Stream - avcDecoderConfigurationRecord  ok
+22:50:05.313 [defaultEventExecutorGroup-3-1] INFO  c.l.m.s.e.Stream - Metadata:{videocodecid=7.0, width=384.0, height=216.0, AspectRatioX=1.0, AspectRatioY=1.0, framerate=5.0, videodatarate=2048.0, metadatacreator=GStreamer 1.20.1 FLV muxer, encoder=GStreamer 1.20.1 FLV muxer, creationdate=Tue Apr 26 14:50:05 2022}
+22:50:37.384 [nioEventLoopGroup-2-3] INFO  c.l.m.s.h.ConnectionAdapter - channel active:/[0:0:0:0:0:0:0:1]:60038
+22:50:37.393 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[connect, 1.0, {app=live, flashVer=LNX 9,0,124,2, tcUrl=rtmp://localhost:1935/live, fpad=false, capabilities=15.0, audioCodecs=4071.0, videoCodecs=252.0, videoFunction=1.0}])
+22:50:37.394 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.h.RtmpMessageHandler - client connect RtmpCommandMessage(command=[connect, 1.0, {app=live, flashVer=LNX 9,0,124,2, tcUrl=rtmp://localhost:1935/live, fpad=false, capabilities=15.0, audioCodecs=4071.0, videoCodecs=252.0, videoFunction=1.0}]) 
+22:50:37.394 [nioEventLoopGroup-2-3] INFO  c.l.m.s.h.ChunkEncoder - chunksize in encoder changed to:5000
+22:50:37.395 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : WindowAcknowledgementSize(windowSize=5000000)
+22:50:37.395 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[createStream, 2.0, null])
+22:50:37.395 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.h.RtmpMessageHandler - create stream received : RtmpCommandMessage(command=[createStream, 2.0, null])
+22:50:37.396 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[getStreamLength, 3.0, null, live])
+22:50:37.396 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[play, 4.0, null, live, -2000.0])
+22:50:37.396 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.h.RtmpMessageHandler - client play request for stream:StreamName(app=live, name=live, obsClient=false) but not exist.
+22:50:37.396 [defaultEventExecutorGroup-3-2] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : UserControlMessageEvent(eventType=3, data=5)
+22:50:37.397 [nioEventLoopGroup-2-3] INFO  c.l.m.s.h.ConnectionAdapter - channel inactive:/[0:0:0:0:0:0:0:1]:60038
+22:51:23.520 [nioEventLoopGroup-2-4] INFO  c.l.m.s.h.ConnectionAdapter - channel active:/[0:0:0:0:0:0:0:1]:60040
+22:51:23.546 [defaultEventExecutorGroup-3-3] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[connect, 1.0, {app=live, flashVer=LNX 9,0,124,2, tcUrl=rtmp://localhost:1935/live, fpad=false, capabilities=15.0, audioCodecs=4071.0, videoCodecs=252.0, videoFunction=1.0}])
+22:51:23.546 [defaultEventExecutorGroup-3-3] INFO  c.l.m.s.h.RtmpMessageHandler - client connect RtmpCommandMessage(command=[connect, 1.0, {app=live, flashVer=LNX 9,0,124,2, tcUrl=rtmp://localhost:1935/live, fpad=false, capabilities=15.0, audioCodecs=4071.0, videoCodecs=252.0, videoFunction=1.0}]) 
+22:51:23.547 [nioEventLoopGroup-2-4] INFO  c.l.m.s.h.ChunkEncoder - chunksize in encoder changed to:5000
+22:51:23.548 [defaultEventExecutorGroup-3-3] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : WindowAcknowledgementSize(windowSize=5000000)
+22:51:23.549 [defaultEventExecutorGroup-3-3] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[createStream, 2.0, null])
+22:51:23.549 [defaultEventExecutorGroup-3-3] INFO  c.l.m.s.h.RtmpMessageHandler - create stream received : RtmpCommandMessage(command=[createStream, 2.0, null])
+22:51:23.550 [defaultEventExecutorGroup-3-3] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[getStreamLength, 3.0, null, test])
+22:51:23.550 [defaultEventExecutorGroup-3-3] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[play, 4.0, null, test, -2000.0])
+22:51:23.551 [defaultEventExecutorGroup-3-3] INFO  c.l.m.s.e.Stream - subscriber : [id: 0x8af6675c, L:/[0:0:0:0:0:0:0:1]:1935 - R:/[0:0:0:0:0:0:0:1]:60040] is added to stream :StreamName(app=live, name=test, obsClient=false)
+22:51:23.558 [defaultEventExecutorGroup-3-3] INFO  c.l.m.s.e.Stream - avcDecoderConfigurationRecord:VideoMessage [timestampDelta=0, timestamp=67800, inboundHeaderLength=12, inboundBodyLength=50]
+22:51:23.559 [defaultEventExecutorGroup-3-3] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : UserControlMessageEvent(eventType=3, data=5)
+22:51:36.677 [nioEventLoopGroup-2-4] ERROR c.l.m.s.h.ConnectionAdapter - channel exceptionCaught:/[0:0:0:0:0:0:0:1]:60040
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:394)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:426)
+	at io.netty.buffer.PooledByteBuf.setBytes(PooledByteBuf.java:253)
+	at io.netty.buffer.AbstractByteBuf.writeBytes(AbstractByteBuf.java:1132)
+	at io.netty.channel.socket.nio.NioSocketChannel.doReadBytes(NioSocketChannel.java:350)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:151)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:719)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:655)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:581)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:493)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+22:51:36.678 [nioEventLoopGroup-2-4] INFO  c.l.m.s.h.ConnectionAdapter - channel inactive:/[0:0:0:0:0:0:0:1]:60040
+22:52:12.494 [nioEventLoopGroup-2-5] INFO  c.l.m.s.h.ConnectionAdapter - channel active:/[0:0:0:0:0:0:0:1]:60042
+22:52:12.500 [defaultEventExecutorGroup-3-4] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[connect, 1.0, {app=live, flashVer=LNX 9,0,124,2, tcUrl=rtmp://localhost:1935/live, fpad=false, capabilities=15.0, audioCodecs=4071.0, videoCodecs=252.0, videoFunction=1.0}])
+22:52:12.501 [defaultEventExecutorGroup-3-4] INFO  c.l.m.s.h.RtmpMessageHandler - client connect RtmpCommandMessage(command=[connect, 1.0, {app=live, flashVer=LNX 9,0,124,2, tcUrl=rtmp://localhost:1935/live, fpad=false, capabilities=15.0, audioCodecs=4071.0, videoCodecs=252.0, videoFunction=1.0}]) 
+22:52:12.501 [nioEventLoopGroup-2-5] INFO  c.l.m.s.h.ChunkEncoder - chunksize in encoder changed to:5000
+22:52:12.501 [defaultEventExecutorGroup-3-4] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : WindowAcknowledgementSize(windowSize=5000000)
+22:52:12.501 [defaultEventExecutorGroup-3-4] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[createStream, 2.0, null])
+22:52:12.501 [defaultEventExecutorGroup-3-4] INFO  c.l.m.s.h.RtmpMessageHandler - create stream received : RtmpCommandMessage(command=[createStream, 2.0, null])
+22:52:12.502 [defaultEventExecutorGroup-3-4] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[getStreamLength, 3.0, null, test])
+22:52:12.502 [defaultEventExecutorGroup-3-4] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : RtmpCommandMessage(command=[play, 4.0, null, test, -2000.0])
+22:52:12.502 [defaultEventExecutorGroup-3-4] INFO  c.l.m.s.e.Stream - subscriber : [id: 0xef5a9181, L:/[0:0:0:0:0:0:0:1]:1935 - R:/[0:0:0:0:0:0:0:1]:60042] is added to stream :StreamName(app=live, name=test, obsClient=false)
+22:52:12.502 [defaultEventExecutorGroup-3-4] INFO  c.l.m.s.e.Stream - avcDecoderConfigurationRecord:VideoMessage [timestampDelta=0, timestamp=117800, inboundHeaderLength=12, inboundBodyLength=50]
+22:52:12.502 [defaultEventExecutorGroup-3-4] INFO  c.l.m.s.h.RtmpMessageHandler - RTMP_Message_Read : UserControlMessageEvent(eventType=3, data=5)
+22:52:32.619 [nioEventLoopGroup-2-5] ERROR c.l.m.s.h.ConnectionAdapter - channel exceptionCaught:/[0:0:0:0:0:0:0:1]:60042
+java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.SocketChannelImpl.throwConnectionReset(SocketChannelImpl.java:394)
+	at java.base/sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:426)
+	at io.netty.buffer.PooledByteBuf.setBytes(PooledByteBuf.java:253)
+	at io.netty.buffer.AbstractByteBuf.writeBytes(AbstractByteBuf.java:1132)
+	at io.netty.channel.socket.nio.NioSocketChannel.doReadBytes(NioSocketChannel.java:350)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:151)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:719)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:655)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:581)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:493)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+22:52:32.619 [nioEventLoopGroup-2-5] INFO  c.l.m.s.h.ConnectionAdapter - channel inactive:/[0:0:0:0:0:0:0:1]:60042
+22:52:46.271 [nioEventLoopGroup-2-2] INFO  c.l.m.s.h.ConnectionAdapter - channel inactive:/127.0.0.1:51014

@@ -19,7 +19,7 @@
       (. rtmp-server run)
       (. http-flv-server run))))
 
-(defn init (let [server (u/start-server 12345)]
-             (do
-               (u/start-handle-msg server u/global-msg)
-               (start-mylive "./mylive.yaml"))))
+(defn init [] (let [server (u/start-server 12345)]
+                (do
+                  (u/start-handle-msg server u/global-msg)
+                  (start-mylive "./mylive.yaml"))))
