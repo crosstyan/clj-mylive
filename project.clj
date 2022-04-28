@@ -7,7 +7,8 @@
                  [org.clojure/core.match "1.0.0"]
                  [org.clojure/core.async "1.5.648"]
                  [aleph "0.4.7"]
-                 [com.longyb/mylive "0.0.1" :exclusions [io.netty/netty-all]]
+                 [com.longyb/mylive "0.0.1" :exclusions [io.netty/netty-all
+                                                         ch.qos.logback/logback-classic]]
                  [metosin/reitit "0.5.18"]
                  [org.clojure/spec.alpha "0.3.218"]
                  [metosin/muuntaja "0.6.8"]
