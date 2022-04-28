@@ -7,7 +7,7 @@
     [byte-streams :as bs]
     [clojure.core.match :refer [match]]))
 
-(defn start-server
+(defn start
   "start an udp server at `port`"
   [port]
   ;; server is a manifold.deferred
@@ -54,7 +54,10 @@
   "`recv-msg` raw msg received by `manifold.stream`. return byte-array"
   [recv-msg]
   ;; msg is a vector of bytes
-  (let [msg (vec (:message (raw-msg->msg recv-msg)))
+  (let [converted (raw-msg->msg recv-msg)
+        msg (:vector converted)
+        ;_nil (println (map hex->str msg))                   ;; for debug side effect
+        ;_nil' (println (:port converted))
         head (first msg)
         heq #(= head (unchecked-byte %1))]
     (cond

@@ -1,25 +1,19 @@
 (ns elevator-server.core
-  (:require [elevator-server.udp-server :as u])
-  (:import [com.longyb.mylive.server ConfigUtils HttpFlvServer RTMPServer]
-           [com.longyb.mylive.server.manager StreamManager]))
+  (:require [elevator-server.udp-server :as u]
+            [elevator-server.mylive :as mylive]
+            [elevator-server.http :as http]))
 
-;; http://www.slf4j.org/codes.html#multiple_bindings
-;; don't actually care about it
-(defn start-mylive
-  "Reading config from `config-path` and start MyLive
-  See https://github.com/crosstyan/MyLive/blob/deps/src/main/java/com/longyb/mylive/server/MyLiveServer.java
-  and https://github.com/crosstyan/MyLive/blob/deps/mylive.yaml"
-  [config-path]
-  (let [stream-man (StreamManager.)
-        cfg (ConfigUtils/readConfigFrom config-path)
-        pool-size (. cfg getHandlerThreadPoolSize)
-        rtmp-server (RTMPServer. (. cfg getRtmpPort) stream-man pool-size)
-        http-flv-server (HttpFlvServer. (. cfg getHttpFlvPort) stream-man pool-size)]
-    (do
-      (. rtmp-server run)
-      (. http-flv-server run))))
+;; prefer aleph
+;; https://aleph.io/examples/literate.html#aleph.examples.http
+;; https://cljdoc.org/d/http-kit/http-kit/2.6.0-alpha1/doc/readme
 
-(defn init [] (let [server (u/start-server 12345)]
+
+(defn init [] (let [udp-port 12345
+                    http-api-port 3001
+                    server (u/start udp-port)]
                 (do
-                  (u/start-handle-msg server u/global-msg)
-                  (start-mylive "./mylive.yaml"))))
+                  ;(u/start-handle-msg server u/global-msg)
+                  ;(mylive/start "./mylive.yaml")
+                  (http/start http-api-port))))
+
+(init)
