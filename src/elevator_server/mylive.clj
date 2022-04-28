@@ -2,8 +2,6 @@
   (:import [com.longyb.mylive.server ConfigUtils HttpFlvServer RTMPServer]
            [com.longyb.mylive.server.manager StreamManager]))
 
-;; http://www.slf4j.org/codes.html#multiple_bindings
-;; don't actually care about it
 (defn start
   "Reading config from `config-path` and start MyLive
   See https://github.com/crosstyan/MyLive/blob/deps/src/main/java/com/longyb/mylive/server/MyLiveServer.java
