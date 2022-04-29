@@ -2,11 +2,14 @@
   (:require  [aleph.http :as a-http]
              [manifold.deferred :as md]
              [manifold.stream :as ms]
+             [manifold.bus :as bus]
+             [clojure.data.json :as json]
              [elevator-server.global :refer [conn db]]
              [elevator-server.utils.core :refer [nil?-or]]
              [elevator-server.utils.http :refer [opts coercion-error-handler]]
              [monger.core :as mg]
              [monger.collection :as mc]
+             [clojure.pprint :as pp]
              [reitit.ring :as ring]
              [reitit.coercion.spec]
              [clojure.spec.alpha :as s]
@@ -25,23 +28,27 @@
 ;; example from
 ;; https://github.com/metosin/reitit/blob/master/examples/ring-swagger/src/example/server.clj
 
+;(def rtmp-events (ms/buffered-stream 20))
+(def rtmp-events (bus/event-bus))
+
 (def non-websocket-request
   {:status 400
    :headers {"content-type" "application/text"}
    :body "Expected a websocket request."})
 
 ;; see https://github.com/clj-commons/aleph/blob/master/examples/src/aleph/examples/websocket.clj
-(defn echo-handler
-  "The previous handler blocks until the websocket handshake completes, which unnecessarily
-   takes up a thread.  This accomplishes the same as above, but asynchronously. "
+(defn rtmp-ws-handler
   [req]
-  (-> (a-http/websocket-connection req)
-      (md/chain
-        (fn [socket]
-          (ms/connect socket socket)))
-      (md/catch
-        (fn [_]
-          non-websocket-request))))
+  (md/let-flow [conn (md/catch
+                      (a-http/websocket-connection req)
+                      (fn [_] nil))]
+              (if-not conn
+                ;; if it wasn't a valid websocket handshake, return an error
+                non-websocket-request
+                (md/let-flow [rtmp (bus/subscribe rtmp-events :e)]
+                            ;; take all messages from the rtmp, and feed them to the client
+                             (ms/connect rtmp conn)
+                            nil))))
 
 (defn two-bytes? [x] (and (< x 65535) (< 0 x)))
 (s/def :dev/name string?)
@@ -128,14 +135,19 @@
                                 doc (dissoc (mc/find-one-as-map db "device" {:id id} ) :_id)]
                             (if doc {:status 200 :body doc}
                                     {:status 404 :body {:result "not found"}})))}}]
+       ["/ws"
+        {:get {:summary "websocket"
+               :no-doc true
+               :handler rtmp-ws-handler}}]
        ["/rtmp"
         {:swagger {:tags ["RTMP"]}
          :post {:summary "get realtime rtmp message from mylive"
                 :parameters {:body {:name string? :cmd string?}}
                 :handler (fn [req]
                            (let [{{b :body} :parameters} req]
-                             {:status 200}))}}]]
-      opts)
+                             (do
+                               (bus/publish! rtmp-events :e (json/write-str b))
+                               {:status 200})))}}]] opts)
     (ring/routes
       (swagger-ui/create-swagger-ui-handler
         {:path "/swagger"

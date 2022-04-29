@@ -8,6 +8,8 @@
                  [org.clojure/core.async "1.5.648"]
                  [metosin/spec-tools "0.10.5"]
                  [expound "0.9.0"]
+                 [org.clojure/core.async "1.5.648"]
+                 [org.clojure/data.json "2.4.0"]
                  [io.netty/netty-all "4.1.76.Final"]
                  [aleph "0.4.7" :exclusions [org.clojure/tools.logging
                                              io.netty/netty-transport
