@@ -59,7 +59,6 @@
 (defn device-post-handler [req db]
   (let [{{b :body} :parameters} req
         ;; TODO purify the input before insert
-        _nil (println b)
         {id :id} b]
     (if (not (mc/find-one-as-map db "device" {:id id}))
       (do (mc/insert db "device" b)
@@ -159,7 +158,14 @@
                           (let [{{{:keys [id]} :path} :parameters} req
                                 doc (dissoc (mc/find-one-as-map db "device" {:id id} ) :_id)]
                             (if doc {:status 200 :body doc}
-                                    {:status 404 :body {:result "not found"}})))}}]]
+                                    {:status 404 :body {:result "not found"}})))}}]
+       ["/rtmp"
+        {:swagger {:tags ["RTMP"]}
+         :post {:summary "get realtime rtmp message from mylive"
+                :parameters {:body {:name string? :cmd string?}}
+                :handler (fn [req]
+                           (let [{{b :body} :parameters} req]
+                             {:status 200}))}}]]
       opts)
     (ring/routes
       (swagger-ui/create-swagger-ui-handler

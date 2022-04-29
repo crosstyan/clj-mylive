@@ -4,6 +4,7 @@
     [manifold.stream :as s]
     [aleph.udp :as udp]
     [clojure.string :as str]
+    [elevator-server.global :refere [db]]
     [byte-streams :as bs]
     [clojure.core.match :refer [match]]))
 
