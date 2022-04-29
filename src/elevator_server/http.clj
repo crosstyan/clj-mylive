@@ -1,6 +1,10 @@
 (ns elevator-server.http
   (:require  [aleph.http :as a-http]
+             [manifold.deferred :as md]
+             [manifold.stream :as ms]
              [elevator-server.global :refer [conn db]]
+             [elevator-server.utils.core :refer [nil?-or]]
+             [elevator-server.utils.http :refer [opts coercion-error-handler]]
              [monger.core :as mg]
              [monger.collection :as mc]
              [reitit.ring :as ring]
@@ -14,20 +18,30 @@
              [reitit.dev.pretty :as pretty]
              [spec-tools.core :as st]
              [spec-tools.swagger.core :as swag]
-             [reitit.ring.middleware.muuntaja :as muuntaja]
-             [reitit.ring.middleware.exception :as exception]
-             [reitit.ring.middleware.multipart :as multipart]
-             [reitit.ring.middleware.parameters :as parameters]
              [ring.middleware.reload :refer [wrap-reload]]
-             [monger.conversion :refer [from-db-object]]
-             [muuntaja.core :as m]
-             [expound.alpha :as expound]
-             [clojure.java.io :as io]))
+             [monger.conversion :refer [from-db-object]]))
 
 
 ;; example from
 ;; https://github.com/metosin/reitit/blob/master/examples/ring-swagger/src/example/server.clj
 
+(def non-websocket-request
+  {:status 400
+   :headers {"content-type" "application/text"}
+   :body "Expected a websocket request."})
+
+;; see https://github.com/clj-commons/aleph/blob/master/examples/src/aleph/examples/websocket.clj
+(defn echo-handler
+  "The previous handler blocks until the websocket handshake completes, which unnecessarily
+   takes up a thread.  This accomplishes the same as above, but asynchronously. "
+  [req]
+  (-> (a-http/websocket-connection req)
+      (md/chain
+        (fn [socket]
+          (ms/connect socket socket)))
+      (md/catch
+        (fn [_]
+          non-websocket-request))))
 
 (defn two-bytes? [x] (and (< x 65535) (< 0 x)))
 (s/def :dev/name string?)
@@ -40,9 +54,6 @@
 ;; Alt + Shift + P eval current expression from top
 ;; Alt + Shift + R replace to current workspace
 
-(defn nil?-or
-  "return default if elem is nil. or return elem if not so"
-  [elem default] (if (nil? elem) default elem))
 
 (defn device-get-handler [req db]
   (let [{{{:keys [page elems]} :query} :parameters} req
@@ -51,7 +62,6 @@
         docs (->> (mq/with-collection db "device"
                                    ;; macro first threading is called
                                    (mq/find {})
-                                   ;(mq/fields ["id" "name"])
                                    (mq/paginate :page page :per-page elems))
                (map #(dissoc % :_id)))]
     {:status 200 :body docs}))
@@ -70,47 +80,6 @@
 ;; https://github.com/metosin/reitit/blob/master/doc/coercion/coercion.md
 ;; https://github.com/metosin/reitit/blob/master/doc/ring/coercion.md
 ;; https://github.com/ring-clojure/ring/wiki/Concepts
-
-;; https://cljdoc.org/d/metosin/reitit/0.5.18/doc/ring/pluggable-coercion
-(defn coercion-error-handler [status]
-  (let [printer (expound/custom-printer {:theme :figwheel-theme, :print-specs? false})
-        handler (exception/create-coercion-handler status)]
-    (fn [exception request]
-      (printer (-> exception ex-data :problems))
-      (handler exception request))))
-
-(def opts
-  {:exception pretty/exception
-   :data {:coercion reitit.coercion.spec/coercion
-          :muuntaja m/instance
-          :middleware [;; swagger feature
-                       swagger/swagger-feature
-                       ;; query-params & form-params
-                       parameters/parameters-middleware
-                       ;; content-negotiation
-                       muuntaja/format-negotiate-middleware
-                       ;; encoding response body
-                       muuntaja/format-response-middleware
-                       ;; exception handling
-                       ;(exception/create-exception-middleware
-                       ;  {::exception/default (partial exception/wrap-log-to-console exception/default-handler)})
-                       (exception/create-exception-middleware
-                         (merge
-                           exception/default-handlers
-                           {:reitit.coercion/request-coercion (coercion-error-handler 400)
-                            :reitit.coercion/response-coercion (coercion-error-handler 500)}))
-                       ;; decoding request body
-                       ;; https://cljdoc.org/d/metosin/reitit/0.5.15/doc/ring/content-negotiation
-                       muuntaja/format-request-middleware
-                       ;; coercing response bodys
-                       coercion/coerce-response-middleware
-                       ;; coercing request parameters
-                       coercion/coerce-request-middleware
-                       ;; hot reload
-                       ;; https://stackoverflow.com/questions/59379314/how-to-make-a-ring-server-reload-on-file-change
-                       wrap-reload
-                       ;; multipart
-                       multipart/multipart-middleware]}})
 
 (defn create-app
   "db is mongo db"

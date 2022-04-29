@@ -1,8 +1,7 @@
 (ns elevator-server.global
   (:require
     [monger.core :as mg]
-    [mount.core :refer [defstate]
-     ]))
+    [mount.core :refer [defstate]]))
 
 (defstate conn
           "monger connection"
@@ -10,3 +9,5 @@
           :stop  (mg/disconnect conn))
 
 (defstate db :start (mg/get-db conn "app"))
+
+
