@@ -8,3 +8,5 @@
           "monger connection"
           :start (mg/connect)
           :stop  (mg/disconnect conn))
+
+(defstate db :start (mg/get-db conn "app"))

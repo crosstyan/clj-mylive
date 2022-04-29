@@ -2,6 +2,7 @@
   (:require [elevator-server.udp-server :as u]
             [elevator-server.mylive :as mylive]
             [monger.core :as mg]
+            [mount.core :as mnt :refer [defstate]]
             [elevator-server.http :as http]))
 
 ;; prefer aleph
@@ -12,6 +13,7 @@
                     http-api-port 3001
                     server (u/start udp-port)]
                 (do
+                  (mnt/start)
                   ;(u/start-handle-msg server u/global-msg)
                   ;(mylive/start "./mylive.yaml")
                   (http/start http-api-port))))

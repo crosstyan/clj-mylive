@@ -1,14 +1,15 @@
 (ns elevator-server.http
   (:require  [aleph.http :as a-http]
-             [elevator-server.global :refer [conn]]
+             [elevator-server.global :refer [conn db]]
              [monger.core :as mg]
+             [monger.collection :as mc]
              [reitit.ring :as ring]
              [reitit.coercion.spec]
-             [mount.core :as mnt :refer [defstate]]
              [clojure.spec.alpha :as s]
              [reitit.swagger :as swagger]
              [reitit.swagger-ui :as swagger-ui]
              [reitit.coercion.spec :as rcs]
+             [monger.query :as mq]
              [reitit.ring.coercion :as coercion]
              [reitit.dev.pretty :as pretty]
              [spec-tools.core :as st]
@@ -18,43 +19,58 @@
              [reitit.ring.middleware.multipart :as multipart]
              [reitit.ring.middleware.parameters :as parameters]
              [ring.middleware.reload :refer [wrap-reload]]
+             [monger.conversion :refer [from-db-object]]
              [muuntaja.core :as m]
              [expound.alpha :as expound]
              [clojure.java.io :as io]))
 
-(defstate db :start (mg/get-db conn "app"))
 
 ;; example from
 ;; https://github.com/metosin/reitit/blob/master/examples/ring-swagger/src/example/server.clj
+
 
 (defn two-bytes? [x] (and (< x 65535) (< 0 x)))
 (s/def :dev/name string?)
 (s/def :dev/id (s/and int? two-bytes?))
 (s/def :s/device (s/keys :req-un [:dev/name :dev/id]))
+(s/def :s/page nat-int?)
+(s/def :s/elems (s/and pos-int? #(< % 100)))
 
 ;; Alt + Shift + L reload current file to repl
 ;; Alt + Shift + P eval current expression from top
 ;; Alt + Shift + R replace to current workspace
 
+(defn nil?-or
+  "return default if elem is nil. or return elem if not so"
+  [elem default] (if (nil? elem) default elem))
+
 (defn device-get-handler [req db]
-  (let [{{{:keys [id]} :query} :parameters} req
-        _nil (println id)
-        res [{:id 25 :name "test"}]]
-    {:status 200 :body res}))
+  (let [{{{:keys [page elems]} :query} :parameters} req
+        page (nil?-or page 0)
+        elems (nil?-or elems 10)
+        docs (->> (mq/with-collection db "device"
+                                   ;; macro first threading is called
+                                   (mq/find {})
+                                   ;(mq/fields ["id" "name"])
+                                   (mq/paginate :page page :per-page elems))
+               (map #(dissoc % :_id)))]
+    {:status 200 :body docs}))
 
 (defn device-post-handler [req db]
   (let [{{b :body} :parameters} req
+        ;; TODO purify the input before insert
         _nil (println b)
-        res {:result "sucess"}
-        ]
-    {:status 200 :body res}))
+        {id :id} b]
+    (if (not (mc/find-one-as-map db "device" {:id id}))
+      (do (mc/insert db "device" b)
+          {:status 200 :body {:result "success"}})
+      {:status 400 :body {:result (format "id %d existed" id)}})))
 
 ;; https://cljdoc.org/d/metosin/spec-tools/0.10.5/doc/spec-coercion
 ;; https://cljdoc.org/d/metosin/reitit/0.5.18/doc/coercion/clojure-spec
 ;; https://github.com/metosin/reitit/blob/master/doc/coercion/coercion.md
 ;; https://github.com/metosin/reitit/blob/master/doc/ring/coercion.md
 ;; https://github.com/ring-clojure/ring/wiki/Concepts
-
 
 ;; https://cljdoc.org/d/metosin/reitit/0.5.18/doc/ring/pluggable-coercion
 (defn coercion-error-handler [status]
@@ -126,15 +142,25 @@
         {:swagger {:tags ["device"]}
          :get {:summary "get all available devices with mongo"
                :coercion rcs/coercion
-               :parameters {:query (s/keys :req-un [:dev/id])}
+               :parameters {:query (s/keys :opt-un [:s/page :s/elems])}
                :responses {200 {:body (s/* :s/device)}}
                :handler #(device-get-handler % db)}
          :post {:summary "post a device"
                 :coercion rcs/coercion
                 :parameters {:body :s/device}
                 :responses {200 {:body {:result string?}}}
-                :handler #(device-post-handler % db)}}
-        ]] opts)
+                :handler #(device-post-handler % db)}}]
+       ["/device/{id}"
+        {:swagger {:tags ["device"]}
+         :get {:summary "get certain device"
+               :parameters {:path (s/keys :req-un [:dev/id])}
+               :responses {200 {:body :s/device}}
+               :handler (fn [req]
+                          (let [{{{:keys [id]} :path} :parameters} req
+                                doc (dissoc (mc/find-one-as-map db "device" {:id id} ) :_id)]
+                            (if doc {:status 200 :body doc}
+                                    {:status 404 :body {:result "not found"}})))}}]]
+      opts)
     (ring/routes
       (swagger-ui/create-swagger-ui-handler
         {:path "/swagger"
@@ -145,7 +171,6 @@
 (def app (create-app db))
 
 (defn start [port]
-  (mnt/start conn)
   ;; used for repl
   ;; https://stackoverflow.com/questions/17792084/what-is-i-see-in-ring-app
   ;; https://stackoverflow.com/questions/39550513/when-to-use-a-var-instead-of-a-function
