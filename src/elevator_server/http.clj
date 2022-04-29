@@ -1,5 +1,5 @@
-﻿(ns elevator-server.http
-  (:require  [aleph.http :as http]
+(ns elevator-server.http
+  (:require  [aleph.http :as a-http]
              [elevator-server.global :refer [conn]]
              [monger.core :as mg]
              [reitit.ring :as ring]
@@ -19,6 +19,7 @@
              [reitit.ring.middleware.parameters :as parameters]
              [ring.middleware.reload :refer [wrap-reload]]
              [muuntaja.core :as m]
+             [expound.alpha :as expound]
              [clojure.java.io :as io]))
 
 (defstate db :start (mg/get-db conn "app"))
@@ -28,7 +29,7 @@
 
 (defn two-bytes? [x] (and (< x 65535) (< 0 x)))
 (s/def :dev/name string?)
-(s/def :dev/id (s/and number? two-bytes?))
+(s/def :dev/id (s/and int? two-bytes?))
 (s/def :s/device (s/keys :req-un [:dev/name :dev/id]))
 
 ;; Alt + Shift + L reload current file to repl
@@ -36,11 +37,16 @@
 ;; Alt + Shift + R replace to current workspace
 
 (defn device-get-handler [req db]
-  (let [res [{:id 25}]]
+  (let [{{{:keys [id]} :query} :parameters} req
+        _nil (println id)
+        res [{:id 25 :name "test"}]]
     {:status 200 :body res}))
 
 (defn device-post-handler [req db]
-  (let [res [{:id 100}]]
+  (let [{{b :body} :parameters} req
+        _nil (println b)
+        res {:result "sucess"}
+        ]
     {:status 200 :body res}))
 
 ;; https://cljdoc.org/d/metosin/spec-tools/0.10.5/doc/spec-coercion
@@ -48,6 +54,15 @@
 ;; https://github.com/metosin/reitit/blob/master/doc/coercion/coercion.md
 ;; https://github.com/metosin/reitit/blob/master/doc/ring/coercion.md
 ;; https://github.com/ring-clojure/ring/wiki/Concepts
+
+
+;; https://cljdoc.org/d/metosin/reitit/0.5.18/doc/ring/pluggable-coercion
+(defn coercion-error-handler [status]
+  (let [printer (expound/custom-printer {:theme :figwheel-theme, :print-specs? false})
+        handler (exception/create-coercion-handler status)]
+    (fn [exception request]
+      (printer (-> exception ex-data :problems))
+      (handler exception request))))
 
 (def opts
   {:exception pretty/exception
@@ -62,8 +77,13 @@
                        ;; encoding response body
                        muuntaja/format-response-middleware
                        ;; exception handling
+                       ;(exception/create-exception-middleware
+                       ;  {::exception/default (partial exception/wrap-log-to-console exception/default-handler)})
                        (exception/create-exception-middleware
-                         {::exception/default (partial exception/wrap-log-to-console exception/default-handler)})
+                         (merge
+                           exception/default-handlers
+                           {:reitit.coercion/request-coercion (coercion-error-handler 400)
+                            :reitit.coercion/response-coercion (coercion-error-handler 500)}))
                        ;; decoding request body
                        ;; https://cljdoc.org/d/metosin/reitit/0.5.15/doc/ring/content-negotiation
                        muuntaja/format-request-middleware
@@ -129,5 +149,5 @@
   ;; used for repl
   ;; https://stackoverflow.com/questions/17792084/what-is-i-see-in-ring-app
   ;; https://stackoverflow.com/questions/39550513/when-to-use-a-var-instead-of-a-function
-  (http/start-server #'app {:port port})
+  (a-http/start-server #'app {:port port})
   (println "API HTTP server runing in port" port))

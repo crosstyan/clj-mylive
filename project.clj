@@ -7,6 +7,7 @@
                  [org.clojure/core.match "1.0.0"]
                  [org.clojure/core.async "1.5.648"]
                  [metosin/spec-tools "0.10.5"]
+                 [expound "0.9.0"]
                  [io.netty/netty-all "4.1.76.Final"]
                  [aleph "0.4.7" :exclusions [org.clojure/tools.logging
                                              io.netty/netty-transport
