@@ -8,6 +8,7 @@ saveFlvFile: true
 saveFlVFilePath: /home/crosstyan/Code/MyLive/flv
 # the size of thread pool that write rtmp and flv packages 
 handlerThreadPoolSize: 8
-
+sendRtmpCmd: true
+rtmpCmdPubApi: "http://127.0.0.1:3001/rtmp"
 
 

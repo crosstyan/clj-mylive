@@ -14,8 +14,8 @@
                     server (u/start udp-port)]
                 (do
                   (mnt/start)
-                  ;(u/start-handle-msg server u/global-msg)
-                  ;(mylive/start "./mylive.yaml")
+                  (u/start-handle-msg server u/global-msg)
+                  (mylive/start "./mylive.yaml")
                   (http/start http-api-port))))
 
 (init)
