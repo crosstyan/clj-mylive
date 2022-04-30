@@ -2,104 +2,84 @@
   ;; https://stackoverflow.com/questions/14610957/how-to-rename-using-ns-require-refer/27122360#27122360
   ;(:refer-clojure :rename {udp-server server})
   (:require
-    [manifold.deferred :as d]
-    [manifold.stream :as s]
+    [manifold.stream :as ms]
     [aleph.udp :as udp]
     [clojure.string :as str]
-    [clojure.core.match :refer [match]]
-    [elevator-server.global :refer [db udp-server devices]]
     [byte-streams :as bs]
+    [clojure.core.match :refer [match]]
+    [monger.collection :as mc]
+    [elevator-server.global :refer [db udp-server devices]]
+    [elevator-server.utils.udp :refer [raw-msg->msg rand-by-hash send-back! rand-hex-arr MsgSpec MsgType sMsgType ErrCode]]
+    [byte-streams :as bs]
+    [spec-tools.data-spec :as ds]
     [octet.core :as buf]
-    [clojure.core.match :refer [match]]))
+    [clojure.core.match :refer [match]])
+  (:import
+    (com.google.common.primitives Ints UnsignedInts)
+    (java.io ByteArrayOutputStream)
+    (java.nio ByteBuffer)))
 
-(def MsgType {:INIT        (unchecked-byte 0x70)
-              :RTMP_EMERG  (unchecked-byte 0x77)
-              :RTMP_STREAM (unchecked-byte 0x75)
-              :HEARTBEAT   (unchecked-byte 0x64)})
-(def ElemLen {:ID       2
-              :HASH     4
-              :RTMP_CHN 2})
+(def device
+  {:id integer?
+   :hash integer?
+   (ds/opt :last) integer?                                  ; last seen
+   (ds/opt :name) string?                                   ; name
+   (ds/opt :e-chan) integer?
+   (ds/opt :chan) integer?})
 
-(def ErrCode {:OK   (unchecked-byte 0xff)
-              :BUSY (unchecked-byte 0x01)
-              :ERR  (unchecked-byte 0x00)})
+(def device-spec
+  (ds/spec {:name :g/device
+            :spec device}))
 
-(def MsgSpec {:INIT_CLIENT (buf/spec buf/ubyte buf/uint16)  ;; type id
-              :INIT_SERVER (buf/spec buf/ubyte buf/uint32)  ;; type hash
-              :RTMP_EMERG_CLIENT (buf/spec buf/ubyte buf/uint32) ;; type hash
-              :RTMP_EMERG_SERVER (buf/spec buf/ubyte buf/uint32 buf/uint16) ;; type hash chn
-              :RTMP_STREAM_SERVER (buf/spec buf/ubyte buf/uint32 buf/uint16) ;; type hash chn
-              :RTMP_STREAM_CLIENT (buf/spec buf/ubyte buf/uint32 buf/ubyte) ;; type hash err
-              :HEARTBEAT (buf/spec buf/ubyte buf/uint32) ;; type hash
-              })
+(defn rand-rtmp-emerg-chan []
+  (let [int32-ba (byte-array (map unchecked-byte (rand-hex-arr 4)))
+        int16 (bit-and   0x0000ffff (. Ints fromByteArray int32-ba))
+        int16-c0 (bit-or 0x0000c000 int16)]
+    int16-c0))
 
-;; http://funcool.github.io/octet/latest/
+(defn rand-rtmp-stream-chan []
+  (let [int32-ba (byte-array (map unchecked-byte (rand-hex-arr 4)))
+        int16 (bit-and   0x00003fff (. Ints fromByteArray int32-ba))]
+    int16))
 
-(defn raw-msg->msg
-  "convert raw msg received by `manifold.stream` to
-  {:host, :port, :message, :vertor, :string}"
-  [msg]
-  (let [addr (-> msg (:sender) (bean) (:address) (bean) (:hostAddress))
-        port (-> msg (:sender) (bean) (:port))]
-    {:host    addr
-     :port    port
-     :message (:message msg)}))
+(defn create-rtmp-emerg-resp [hash]
+  "create a RTMP_EMERG msg
+   hash is int32
+   return [byte-array chan: int16]"
+  (let [spec   (:RTMP_EMERG_SERVER MsgSpec)
+        head   (:RTMP_EMERG MsgType)
+        chan   (rand-rtmp-emerg-chan)
+        buffer (buf/allocate (buf/size spec))]
+    [(buf/write! buffer [head hash chan] spec) chan]))
 
-; (send-back! @server @global-msg (byte-array [0x01 0x02]))
-(defn send-back!
-  "send msg to the sender of recv-msg by server
-   @param `server` a `aleph.udp/socket` or any `manifold.stream`
-   @param `recv-msg` raw msg received by `manifold.stream`
-   @param `msg` string or array-bytes"
-  [server raw-msg msg]
-  (let [converted (raw-msg->msg raw-msg)]
-    (s/put! server {:host    (:host converted)
-                    :port    (:port converted)
-                    :message msg})))
-
-(defn hex->str
-  "convert hex number to human-readable string"
-  [x] (format "0x%02x" x))
-
-;; 0 to 255. 256 is exclusive
-(defn rand-hex-arr
-  "make a hex array of length `n`"
-  [n] (take n (repeatedly #(rand-int 256))))
-
-(defn gen-msg
-  "`recv-msg` raw msg received by `manifold.stream`. return byte-array"
+(defn handle-msg
+  "`recv-msg` raw msg received by `manifold.stream`. return byte-array
+   will produce a lot of side effects"
   [recv-msg]
   ;; msg is a vector of bytes
   (let [conv (raw-msg->msg recv-msg)
-        msg  (:message conv)
-        heq  #(= head (unchecked-byte %1))]
-    (match [(first msg)]
-           [(:INIT MsgType)] (let [id ]))
-    (cond
-      ;; See https://clojuredocs.org/clojure.core/unchecked-byte
-      ;; (byte 0x80) is illegal, because 0x80 = 128
-      ;; but byte in clojure is [-128, 128)
-      ;; (byte -128) = 0x80 wired!
-      (heq 0x70) (byte-array (vec (concat [0x70] (rand-hex-arr 16))))
-      (heq 0x78) (byte-array [0x78 0x00])
-      (heq 0x80) (byte-array (vec (concat [0x80 0x00] (rand-hex-arr 4))))
-      :else (byte-array [0x70 0x01]))))
+        ;; vector of bytes which is singed
+        vmsg  (vector (:message conv))
+        buffer (buf/allocate (count vmsg))
+        INIT (:INIT sMsgType)
+        RTMP_EMERG (:RTMP_EMERG sMsgType)
+        RTMP_STREAM (:RTMP_STREAM sMsgType)
+        HEARTBEAT (:HEARTBEAT sMsgType)]
+    (match [(first vmsg)]
+           [INIT] (let [[head id] (buf/read buffer (:INIT_CLIENT MsgSpec))
+                        hash    (rand-by-hash id)]
+                                (if (not (mc/find-one db "device" {:id id}))
+                                  (do (swap! devices #(assoc % hash {:id id :hash hash})))
+                                    (buf/write! buffer [head hash] (:INIT_SERVER MsgSpec)))
+                                  (byte-array [(:INIT sMsgType) (:ERR ErrCode)])))
+           [RTMP_EMERG] (let [[_head hash] (buf/read buffer (:RTMP_EMERG_CLIENT MsgSpec))
+                              [resp e-chan] (create-rtmp-emerg-resp hash)])))
 
-;; make a stream pipeline
-(defn msg-recv
-  [server]
-  (s/map raw-msg->msg @server))
-
-(def global-msg
-  "a reference ready to be passed to `start-handle-msg`
-  init value is nil
-  expect to store the latest message received by server"
-  (ref nil))
 
 (defn app-handler [m]
   ;(dosync (alter global-msg (constantly m)))
-  (send-back! @udp-server m (gen-msg m)))
+  (send-back! @udp-server m (handle-msg m)))
 
 (defn start []
   "start udp server"
-  (s/consume #'app-handler @udp-server))
+  (ms/consume #'app-handler @udp-server))

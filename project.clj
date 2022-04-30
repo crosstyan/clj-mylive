@@ -24,6 +24,11 @@
                  [com.longyb/mylive "0.0.1" :exclusions [io.netty/netty-all
                                                          ch.qos.logback/logback-classic]]
                  [metosin/reitit "0.5.18"]
+                 [com.google.guava/guava "31.1-jre" :exclusions [org.slf4j/slf4j-api
+                                                             org.slf4j/slf4j-log4j12
+                                                             org.slf4j/slf4j-simple
+                                                             org.slf4j/slf4j-nop
+                                                             org.slf4j/slf4j-jdk14]]
                  [org.clojure/spec.alpha "0.3.218"]
                  [metosin/muuntaja "0.6.8"]
                  [org.clojure/tools.logging "1.2.4"]
