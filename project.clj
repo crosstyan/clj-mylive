@@ -12,6 +12,7 @@
                  [org.clojure/data.json "2.4.0"]
                  [io.netty/netty-all "4.1.76.Final"]
                  [ch.qos.logback/logback-classic "1.2.11"]
+                 [funcool/octet "1.1.2"]
                  [aleph "0.4.7" :exclusions [org.clojure/tools.logging
                                              io.netty/netty-transport
                                              io.netty/netty-transport-native-epoll

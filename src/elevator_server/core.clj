@@ -1,6 +1,7 @@
 (ns elevator-server.core
-  (:require [elevator-server.udp-server :as u]
+  (:require [elevator-server.udp :as u]
             [elevator-server.mylive :as mylive]
+            [elevator-server.global :refer [config]]
             [monger.core :as mg]
             [mount.core :as mnt :refer [defstate]]
             [elevator-server.http :as http]))
@@ -9,13 +10,9 @@
 ;; https://aleph.io/examples/literate.html#aleph.examples.http
 ;; https://cljdoc.org/d/http-kit/http-kit/2.6.0-alpha1/doc/readme
 
-(defn init [] (let [udp-port 12345
-                    http-api-port 3001
-                    server (u/start udp-port)]
-                (do
-                  (mnt/start)
-                  (u/start-handle-msg server u/global-msg)
+(defn init [] (do (mnt/start)
+                  (u/start)
                   (mylive/start "./mylive.yaml")
-                  (http/start http-api-port))))
+                  (http/start (:http-api-port config))))
 
 (init)

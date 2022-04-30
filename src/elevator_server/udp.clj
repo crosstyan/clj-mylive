@@ -1,34 +1,49 @@
-(ns elevator-server.udp-server
+(ns elevator-server.udp
+  ;; https://stackoverflow.com/questions/14610957/how-to-rename-using-ns-require-refer/27122360#27122360
+  ;(:refer-clojure :rename {udp-server server})
   (:require
     [manifold.deferred :as d]
     [manifold.stream :as s]
     [aleph.udp :as udp]
     [clojure.string :as str]
-    [elevator-server.global :refere [db]]
+    [clojure.core.match :refer [match]]
+    [elevator-server.global :refer [db udp-server devices]]
     [byte-streams :as bs]
+    [octet.core :as buf]
     [clojure.core.match :refer [match]]))
 
-(defn start
-  "start an udp server at `port`"
-  [port]
-  ;; server is a manifold.deferred
-  ;; need to use (deref) to convert it to manifold.stream
-  (let [server (udp/socket {:port port})]
-    server))
+(def MsgType {:INIT        (unchecked-byte 0x70)
+              :RTMP_EMERG  (unchecked-byte 0x77)
+              :RTMP_STREAM (unchecked-byte 0x75)
+              :HEARTBEAT   (unchecked-byte 0x64)})
+(def ElemLen {:ID       2
+              :HASH     4
+              :RTMP_CHN 2})
+
+(def ErrCode {:OK   (unchecked-byte 0xff)
+              :BUSY (unchecked-byte 0x01)
+              :ERR  (unchecked-byte 0x00)})
+
+(def MsgSpec {:INIT_CLIENT (buf/spec buf/ubyte buf/uint16)  ;; type id
+              :INIT_SERVER (buf/spec buf/ubyte buf/uint32)  ;; type hash
+              :RTMP_EMERG_CLIENT (buf/spec buf/ubyte buf/uint32) ;; type hash
+              :RTMP_EMERG_SERVER (buf/spec buf/ubyte buf/uint32 buf/uint16) ;; type hash chn
+              :RTMP_STREAM_SERVER (buf/spec buf/ubyte buf/uint32 buf/uint16) ;; type hash chn
+              :RTMP_STREAM_CLIENT (buf/spec buf/ubyte buf/uint32 buf/ubyte) ;; type hash err
+              :HEARTBEAT (buf/spec buf/ubyte buf/uint32) ;; type hash
+              })
+
+;; http://funcool.github.io/octet/latest/
 
 (defn raw-msg->msg
   "convert raw msg received by `manifold.stream` to
   {:host, :port, :message, :vertor, :string}"
   [msg]
   (let [addr (-> msg (:sender) (bean) (:address) (bean) (:hostAddress))
-        port (-> msg (:sender) (bean) (:port))
-        vector-msg (-> msg (:message) (vec))
-        string-msg (bs/to-string (:message msg))]
+        port (-> msg (:sender) (bean) (:port))]
     {:host    addr
      :port    port
-     :message (:message msg)
-     :vector  vector-msg
-     :string  string-msg}))
+     :message (:message msg)}))
 
 ; (send-back! @server @global-msg (byte-array [0x01 0x02]))
 (defn send-back!
@@ -55,12 +70,11 @@
   "`recv-msg` raw msg received by `manifold.stream`. return byte-array"
   [recv-msg]
   ;; msg is a vector of bytes
-  (let [converted (raw-msg->msg recv-msg)
-        msg (:vector converted)
-        ;_nil (println (map hex->str msg))                   ;; for debug side effect
-        ;_nil' (println (:port converted))
-        head (first msg)
-        heq #(= head (unchecked-byte %1))]
+  (let [conv (raw-msg->msg recv-msg)
+        msg  (:message conv)
+        heq  #(= head (unchecked-byte %1))]
+    (match [(first msg)]
+           [(:INIT MsgType)] (let [id ]))
     (cond
       ;; See https://clojuredocs.org/clojure.core/unchecked-byte
       ;; (byte 0x80) is illegal, because 0x80 = 128
@@ -82,12 +96,10 @@
   expect to store the latest message received by server"
   (ref nil))
 
-(defn start-handle-msg
-  "`global-ref` is a reference of global message
-   any new message will be written to it"
-  [server global-ref]
-  (s/consume (fn [m]
-               (dosync (alter global-ref (constantly m)))
-               (send-back! @server m (gen-msg m))) @server))
+(defn app-handler [m]
+  ;(dosync (alter global-msg (constantly m)))
+  (send-back! @udp-server m (gen-msg m)))
 
-; (def server (start-server server-port))
+(defn start []
+  "start udp server"
+  (s/consume #'app-handler @udp-server))
