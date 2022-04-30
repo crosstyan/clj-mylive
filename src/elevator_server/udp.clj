@@ -13,16 +13,17 @@
     [byte-streams :as bs]
     [spec-tools.data-spec :as ds]
     [octet.core :as buf]
-    [clojure.core.match :refer [match]])
+    [clojure.core.match :refer [match]]
+    [clojure.tools.logging :as log])
   (:import
     (com.google.common.primitives Ints UnsignedInts)
     (java.io ByteArrayOutputStream)
     (java.nio ByteBuffer)))
 
 (def stored-msg
-  {:message seq?                                            ;; byte-array
-   :port   integer?
-   :host string?
+  {:message       seq?                                      ;; byte-array
+   :port          integer?
+   :host          string?
    (ds/opt :time) integer?})
 
 (def device
@@ -50,9 +51,6 @@
       (apply dis hashes)
       map)))
 
-(defn revoke [map])
-
-
 (defn rand-rtmp-emerg-chan []
   (let [int32-ba (byte-array (map unchecked-byte (rand-hex-arr 4)))
         int16 (bit-and 0x0000ffff (. Ints fromByteArray int32-ba))
@@ -77,11 +75,12 @@
 (defn handle-msg
   "`recv-msg` raw msg received by `manifold.stream`. return byte-array
    will produce a lot of side effects"
-  [recv-msg]
+  [recv]
   ;; msg is a vector of bytes
-  (let [conv (raw-msg->msg recv-msg)
+  (let [conv (raw-msg->msg recv)
         ;; vector of bytes which is singed
         vmsg (vector (:message conv))
+        msg-hex (byte-array->str (:message conv))
         stored (update conv :message byte-array->str)
         buffer (buf/allocate (count vmsg))
         INIT (:INIT sMsgType)
@@ -90,23 +89,35 @@
         HEARTBEAT (:HEARTBEAT sMsgType)]
     (match [(first vmsg)]
            [INIT] (let [[head id] (buf/read buffer (:INIT_CLIENT MsgSpec))
-                        hash (rand-by-hash id)]
+                        hash (rand-by-hash id)
+                        resp (buf/write! buffer [head hash] (:INIT_SERVER MsgSpec))
+                        e (byte-array [(:INIT sMsgType) (:ERR sErrCode)])]
+                    (log/infof "INIT %s" msg-hex)
                     (if (not (mc/find-one db "device" {:id id}))
-                      (do (swap! devices #(assoc % hash {:id id :hash hash :last-msg stored}))) ; device existed in db
-                      (buf/write! buffer [head hash] (:INIT_SERVER MsgSpec)))
-                    (byte-array [(:INIT sMsgType) (:ERR sErrCode)]))
+                      (do (swap! devices #(assoc % hash {:id id :hash hash :last-msg stored}))
+                          (log/infof "INIT %s from Server" (byte-array->str resp))
+                          (send-back! @udp-server recv resp)) ; device existed in db
+                      (send-back! @udp-server recv e)))
            [RTMP_EMERG] (let [[_head hash] (buf/read buffer (:RTMP_EMERG_CLIENT MsgSpec))
                               [resp e-chan] (create-rtmp-emerg-resp hash)
                               dev (get @devices hash)]
+                          (log/infof "RTMP_EMERG %s" msg-hex)
                           (if (not (nil? dev))
-                            (do (swap! @devices #(assoc % hash (assoc dev :e-chan e-chan))) resp)
+                            (do (swap! devices #(assoc % hash (assoc dev :e-chan e-chan :last-msg stored))) ;swap e-chan and last msg
+                                (log/infof "RTMP_EMERG %s from Server" (byte-array->str resp))
+                                (send-back! @udp-server recv resp))
                             nil))
-           [RTMP_STREAM] ())))
+           [HEARTBEAT] (let [[_head hash] (buf/read buffer (:RTMP_EMERG_CLIENT MsgSpec))
+                             dev (get @devices hash)]
+                         (log/infof "HEARTBEAT %s" msg-hex)
+                         (if (not (nil? dev))
+                           (do (swap! devices #(assoc % hash (assoc dev :last-msg stored))))))
+           :else nil)))
 
 
 (defn app-handler [m]
   ;(dosync (alter global-msg (constantly m)))
-  (send-back! @udp-server m (handle-msg m)))
+  (handle-msg m))
 
 (defn start []
   "start udp server"

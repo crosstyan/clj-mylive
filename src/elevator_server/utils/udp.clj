@@ -46,7 +46,7 @@
               })
 
 (defn map-value [f map]
-  (reduce (fn [m k] (assoc m k (f (k MsgType))))
+  (reduce (fn [m k] (assoc m k (f (k map))))
           {} (keys map)))
 
 (def sMsgType (map-value unchecked-byte MsgType))
