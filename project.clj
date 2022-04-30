@@ -11,6 +11,7 @@
                  [org.clojure/core.async "1.5.648"]
                  [org.clojure/data.json "2.4.0"]
                  [io.netty/netty-all "4.1.76.Final"]
+                 [ch.qos.logback/logback-classic "1.2.11"]
                  [aleph "0.4.7" :exclusions [org.clojure/tools.logging
                                              io.netty/netty-transport
                                              io.netty/netty-transport-native-epoll
@@ -19,7 +20,8 @@
                                              io.netty/netty-handler
                                              io.netty/netty-handler-proxy
                                              io.netty/netty-resolver]]
-                 [com.longyb/mylive "0.0.1" :exclusions [io.netty/netty-all]]
+                 [com.longyb/mylive "0.0.1" :exclusions [io.netty/netty-all
+                                                         ch.qos.logback/logback-classic]]
                  [metosin/reitit "0.5.18"]
                  [org.clojure/spec.alpha "0.3.218"]
                  [metosin/muuntaja "0.6.8"]

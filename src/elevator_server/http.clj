@@ -13,6 +13,7 @@
              [reitit.ring :as ring]
              [reitit.coercion.spec]
              [clojure.spec.alpha :as s]
+             [clojure.tools.logging :as log]
              [reitit.swagger :as swagger]
              [reitit.swagger-ui :as swagger-ui]
              [reitit.coercion.spec :as rcs]
@@ -162,4 +163,4 @@
   ;; https://stackoverflow.com/questions/17792084/what-is-i-see-in-ring-app
   ;; https://stackoverflow.com/questions/39550513/when-to-use-a-var-instead-of-a-function
   (a-http/start-server #'app {:port port})
-  (println "API HTTP server runing in port" port))
+  (log/info "API HTTP server runing in port" port))
