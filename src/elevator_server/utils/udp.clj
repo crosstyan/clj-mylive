@@ -35,14 +35,14 @@
               :ERR  0x00})
 
 ;; http://funcool.github.io/octet/latest/
-(def MsgSpec {:INIT_CLIENT        (buf/spec buf/ubyte buf/uint16) ;; type id
-              :INIT_SERVER        (buf/spec buf/ubyte buf/uint32) ;; type hash
-              :INIT_ERROR         (buf/spec buf/ubyte buf/ubyte) ;; type hash
-              :RTMP_EMERG_CLIENT  (buf/spec buf/ubyte buf/uint32) ;; type hash
-              :RTMP_EMERG_SERVER  (buf/spec buf/ubyte buf/uint32 buf/uint16) ;; type hash chn
-              :RTMP_STREAM_SERVER (buf/spec buf/ubyte buf/uint32 buf/uint16) ;; type hash chn
-              :RTMP_STREAM_CLIENT (buf/spec buf/ubyte buf/uint32 buf/ubyte) ;; type hash err
-              :HEARTBEAT          (buf/spec buf/ubyte buf/uint32) ;; type hash
+(def MsgSpec {:INIT_CLIENT        (buf/spec buf/byte buf/int16) ;; type id
+              :INIT_SERVER        (buf/spec buf/byte buf/int32) ;; type hash
+              :INIT_ERROR         (buf/spec buf/byte buf/byte) ;; type hash
+              :RTMP_EMERG_CLIENT  (buf/spec buf/byte buf/int32) ;; type hash
+              :RTMP_EMERG_SERVER  (buf/spec buf/byte buf/int32 buf/int16) ;; type hash chn
+              :RTMP_STREAM_SERVER (buf/spec buf/byte buf/int32 buf/int16) ;; type hash chn
+              :RTMP_STREAM_CLIENT (buf/spec buf/byte buf/int32 buf/byte) ;; type hash err
+              :HEARTBEAT          (buf/spec buf/byte buf/int32) ;; type hash
               })
 
 (defn map-value [f map]

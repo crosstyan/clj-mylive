@@ -42,14 +42,14 @@
 
 (defn revoke-hash
   "remove {hash:int device:device} from global devices list"
-  [map id]
-  (let [devices (vals map)
-        devs-with-id (filter (fn [d] (= (:id d) id)) devices)
-        hashes (map (fn [d] (:hash d)) devs-with-id)
-        dis #(dissoc map %)]
-    (if (empty? hashes)
-      (apply dis hashes)
-      map)))
+  [m id]
+  (let [devices (vals m)
+        devs-with-id (filter (fn [d] (= (:id d) 123)) devices)
+        hashes (map #(:hash %) devs-with-id)]
+    (if (not (empty? hashes))
+      (apply (partial dissoc m) hashes)
+      m))
+)
 
 (defn rand-rtmp-emerg-chan []
   (let [int32-ba (byte-array (map unchecked-byte (rand-hex-arr 4)))
@@ -70,7 +70,9 @@
         head (:RTMP_EMERG MsgType)
         chan (rand-rtmp-emerg-chan)
         buffer (buf/allocate (buf/size spec))]
-    [(buf/write! buffer [head hash chan] spec) chan]))
+    (do
+      (buf/write! buffer [head hash chan] spec)
+      [buffer chan])))
 
 (defn handle-msg
   "`recv-msg` raw msg received by `manifold.stream`. return byte-array
@@ -79,35 +81,43 @@
   ;; msg is a vector of bytes
   (let [conv (raw-msg->msg recv)
         ;; vector of bytes which is singed
-        vmsg (vector (:message conv))
+        buffer-r (. ByteBuffer wrap  (:message conv))
+        vmsg (vec (:message conv))
         msg-hex (byte-array->str (:message conv))
+        ;_nil (do (log/info (first vmsg))
+        ;       (log/infof "UDP recv %s" msg-hex))
         stored (update conv :message byte-array->str)
-        buffer (buf/allocate (count vmsg))
         INIT (:INIT sMsgType)
         RTMP_EMERG (:RTMP_EMERG sMsgType)
         RTMP_STREAM (:RTMP_STREAM sMsgType)
         HEARTBEAT (:HEARTBEAT sMsgType)]
     (match [(first vmsg)]
-           [INIT] (let [[head id] (buf/read buffer (:INIT_CLIENT MsgSpec))
+           [INIT] (let [spec (:INIT_CLIENT MsgSpec)
+                        [_head id] (buf/read buffer-r (:INIT_CLIENT MsgSpec))
+                        _nil (log/info ":head" _head ":id" id)
+                        buffer-w (buf/allocate (buf/size (:INIT_SERVER MsgSpec)))
                         hash (rand-by-hash id)
-                        resp (buf/write! buffer [head hash] (:INIT_SERVER MsgSpec))
+                        _ (buf/write! buffer-w [INIT hash] (:INIT_SERVER MsgSpec))
                         e (byte-array [(:INIT sMsgType) (:ERR sErrCode)])]
                     (log/infof "INIT %s" msg-hex)
-                    (if (not (mc/find-one db "device" {:id id}))
-                      (do (swap! devices #(assoc % hash {:id id :hash hash :last-msg stored}))
-                          (log/infof "INIT %s from Server" (byte-array->str resp))
-                          (send-back! @udp-server recv resp)) ; device existed in db
+                    (if (not (nil? (mc/find-one db "device" {:id id})))
+                      (do (swap! devices #(revoke-hash % id))
+                          (swap! devices #(assoc % hash {:id id :hash hash :last-msg stored}))
+                          ;(log/infof "INIT %s from Server" (byte-array->str buffer-w))
+                          (send-back! @udp-server recv buffer-w)) ; device existed in db
                       (send-back! @udp-server recv e)))
-           [RTMP_EMERG] (let [[_head hash] (buf/read buffer (:RTMP_EMERG_CLIENT MsgSpec))
-                              [resp e-chan] (create-rtmp-emerg-resp hash)
+           [RTMP_EMERG] (let [spec (:RTMP_EMERG_CLIENT MsgSpec)
+                              [_head hash] (buf/read buffer-r (:RTMP_EMERG_CLIENT MsgSpec))
+                              [buffer-w e-chan] (create-rtmp-emerg-resp hash)
                               dev (get @devices hash)]
                           (log/infof "RTMP_EMERG %s" msg-hex)
                           (if (not (nil? dev))
                             (do (swap! devices #(assoc % hash (assoc dev :e-chan e-chan :last-msg stored))) ;swap e-chan and last msg
-                                (log/infof "RTMP_EMERG %s from Server" (byte-array->str resp))
-                                (send-back! @udp-server recv resp))
+                                ;(log/infof "RTMP_EMERG %s from Server" (byte-array->str resp))
+                                (send-back! @udp-server recv buffer-w))
                             nil))
-           [HEARTBEAT] (let [[_head hash] (buf/read buffer (:RTMP_EMERG_CLIENT MsgSpec))
+           [HEARTBEAT] (let [spec (:HEARTBEAT MsgSpec)
+                             [_head hash] (buf/read buffer-r spec)
                              dev (get @devices hash)]
                          (log/infof "HEARTBEAT %s" msg-hex)
                          (if (not (nil? dev))

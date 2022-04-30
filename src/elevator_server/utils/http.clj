@@ -22,6 +22,16 @@
       (printer (-> exception ex-data :problems))
       (handler exception request))))
 
+
+(defn default-ex-handler
+  "Default safe handler for any exception."
+  [^Exception e _]
+  {:status 500
+   :body {:type "exception"
+          :class (.getName (.getClass e))
+          :message (.getMessage e)
+          :exception (ex-data e)}})
+
 (def opts
   {:exception pretty/exception
    :data {:coercion reitit.coercion.spec/coercion
@@ -40,7 +50,8 @@
                        (exception/create-exception-middleware
                          (merge
                            exception/default-handlers
-                           {:reitit.coercion/request-coercion (coercion-error-handler 400)
+                           {::default default-ex-handler
+                            :reitit.coercion/request-coercion (coercion-error-handler 400)
                             :reitit.coercion/response-coercion (coercion-error-handler 500)}))
                        ;; decoding request body
                        ;; https://cljdoc.org/d/metosin/reitit/0.5.15/doc/ring/content-negotiation

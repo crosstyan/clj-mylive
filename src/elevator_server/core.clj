@@ -12,7 +12,7 @@
 
 (defn init [] (do (mnt/start)
                   (u/start)
-                  (mylive/start "./mylive.yaml")
+                  ;(mylive/start "./mylive.yaml")
                   (http/start (:http-api-port config))))
 
 (init)

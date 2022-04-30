@@ -2,7 +2,8 @@
   (:require
     [monger.core :as mg]
     [aleph.udp :as udp]
-    [mount.core :refer [defstate]]))
+    [mount.core :refer [defstate]]
+    [clojure.tools.logging :as log]))
 
 (defn start-udp
   "start an udp server at `port`"
@@ -22,6 +23,7 @@
 
 (defstate db :start (mg/get-db conn "app"))
 
-(defstate udp-server :start (start-udp (:udp-port config)))
+(defstate udp-server :start (do  (log/infof "start udp server at %d", (:udp-port config))
+                              (start-udp (:udp-port config))))
 
 (defstate devices :start (atom {}))
