@@ -35,14 +35,14 @@
               :ERR  0x00})
 
 ;; http://funcool.github.io/octet/latest/
-(def MsgSpec {:INIT_CLIENT (buf/spec buf/ubyte buf/uint16)  ;; type id
-              :INIT_SERVER (buf/spec buf/ubyte buf/uint32)  ;; type hash
-              :INIT_ERROR (buf/spec buf/ubyte buf/ubyte)  ;; type hash
-              :RTMP_EMERG_CLIENT (buf/spec buf/ubyte buf/uint32) ;; type hash
-              :RTMP_EMERG_SERVER (buf/spec buf/ubyte buf/uint32 buf/uint16) ;; type hash chn
+(def MsgSpec {:INIT_CLIENT        (buf/spec buf/ubyte buf/uint16) ;; type id
+              :INIT_SERVER        (buf/spec buf/ubyte buf/uint32) ;; type hash
+              :INIT_ERROR         (buf/spec buf/ubyte buf/ubyte) ;; type hash
+              :RTMP_EMERG_CLIENT  (buf/spec buf/ubyte buf/uint32) ;; type hash
+              :RTMP_EMERG_SERVER  (buf/spec buf/ubyte buf/uint32 buf/uint16) ;; type hash chn
               :RTMP_STREAM_SERVER (buf/spec buf/ubyte buf/uint32 buf/uint16) ;; type hash chn
               :RTMP_STREAM_CLIENT (buf/spec buf/ubyte buf/uint32 buf/ubyte) ;; type hash err
-              :HEARTBEAT (buf/spec buf/ubyte buf/uint32) ;; type hash
+              :HEARTBEAT          (buf/spec buf/ubyte buf/uint32) ;; type hash
               })
 
 (defn map-value [f map]
@@ -50,6 +50,8 @@
           {} (keys map)))
 
 (def sMsgType (map-value unchecked-byte MsgType))
+
+(def sErrCode (map-value unchecked-byte ErrCode))
 
 (defn short-to-bytes-array
   "Convert a short (int16) to a byte array.
@@ -85,7 +87,10 @@
 
 (defn hex->str
   "convert hex number to human-readable string"
-  [x] (format "0x%02x" x))
+  [x] (format "%02x" x))
+
+(defn byte-array->str [ba]
+  (str/join (map hex->str (vec ba))))
 
 ;; 0 to 255. 256 is exclusive
 (defn rand-hex-arr
@@ -111,17 +116,26 @@
      :port    port
      :message (:message msg)}))
 
-; (send-back! @server @global-msg (byte-array [0x01 0x02]))
 (defn send-back!
   "send msg to the sender of recv-msg by server
    @param `server` a `aleph.udp/socket` or any `manifold.stream`
    @param `recv-msg` raw msg received by `manifold.stream`
    @param `msg` string or bytes-array"
   [server raw-msg msg]
-  (let [converted (raw-msg->msg raw-msg)]
-    (ms/put! server {:host    (:host converted)
-                     :port    (:port converted)
+  (let [stored-msg (raw-msg->msg raw-msg)]
+    (ms/put! server {:host    (:host stored-msg)
+                     :port    (:port stored-msg)
                      :message msg})))
+
+(defn send!
+  "send msg to the sender of recv-msg by server
+   @param `server` a `aleph.udp/socket` or any `manifold.stream`
+   @param `stored-msg` a map with {:host, :port, :message}
+   @param `msg` string or bytes-array"
+  [server stored-msg msg]
+  (ms/put! server {:host    (:host stored-msg)
+                   :port    (:port stored-msg)
+                   :message msg}))
 
 ;; make a stream pipeline
 (defn msg-recv
