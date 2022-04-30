@@ -8,7 +8,7 @@
     [byte-streams :as bs]
     [clojure.core.match :refer [match]]
     [monger.collection :as mc]
-    [elevator-server.global :refer [db udp-server devices]]
+    [elevator-server.global :refer [db-udp udp-server devices] :rename {db-udp db}]
     [elevator-server.utils.udp :refer [raw-msg->msg rand-by-hash send-back! byte-array->str rand-hex-arr MsgSpec MsgType sMsgType sErrCode]]
     [byte-streams :as bs]
     [spec-tools.data-spec :as ds]

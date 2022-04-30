@@ -4,7 +4,7 @@
              [manifold.stream :as ms]
              [manifold.bus :as bus]
              [clojure.data.json :as json]
-             [elevator-server.global :refer [conn db]]
+             [elevator-server.global :refer [conn db-http] :rename {db-http db}]
              [elevator-server.utils.core :refer [nil?-or]]
              [elevator-server.utils.http :refer [opts coercion-error-handler]]
              [monger.core :as mg]

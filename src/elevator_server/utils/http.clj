@@ -1,6 +1,6 @@
 (ns elevator-server.utils.http
   (:require
-    [elevator-server.global :refer [conn db]]
+    [elevator-server.global :refer [conn db-http]]
     [reitit.coercion.spec]
     [reitit.swagger :as swagger]
     [reitit.ring.coercion :as coercion]
@@ -27,41 +27,44 @@
   "Default safe handler for any exception."
   [^Exception e _]
   {:status 500
-   :body {:type "exception"
-          :class (.getName (.getClass e))
-          :message (.getMessage e)
-          :exception (ex-data e)}})
+   :body   {:type      "exception"
+            :class     (.getName (.getClass e))
+            :message   (.getMessage e)
+            :exception (ex-data e)}})
 
 (def opts
   {:exception pretty/exception
-   :data {:coercion reitit.coercion.spec/coercion
-          :muuntaja m/instance
-          :middleware [;; swagger feature
-                       swagger/swagger-feature
-                       ;; query-params & form-params
-                       parameters/parameters-middleware
-                       ;; content-negotiation
-                       muuntaja/format-negotiate-middleware
-                       ;; encoding response body
-                       muuntaja/format-response-middleware
-                       ;; exception handling
-                       ;(exception/create-exception-middleware
-                       ;  {::exception/default (partial exception/wrap-log-to-console exception/default-handler)})
-                       (exception/create-exception-middleware
-                         (merge
-                           exception/default-handlers
-                           {::default default-ex-handler
-                            :reitit.coercion/request-coercion (coercion-error-handler 400)
-                            :reitit.coercion/response-coercion (coercion-error-handler 500)}))
-                       ;; decoding request body
-                       ;; https://cljdoc.org/d/metosin/reitit/0.5.15/doc/ring/content-negotiation
-                       muuntaja/format-request-middleware
-                       ;; coercing response bodys
-                       coercion/coerce-response-middleware
-                       ;; coercing request parameters
-                       coercion/coerce-request-middleware
-                       ;; hot reload
-                       ;; https://stackoverflow.com/questions/59379314/how-to-make-a-ring-server-reload-on-file-change
-                       wrap-reload
-                       ;; multipart
-                       multipart/multipart-middleware]}})
+   :data      {:coercion   reitit.coercion.spec/coercion
+               :muuntaja   m/instance
+               :middleware [;; swagger feature
+                            swagger/swagger-feature
+                            ;; query-params & form-params
+                            parameters/parameters-middleware
+                            ;; content-negotiation
+                            muuntaja/format-negotiate-middleware
+                            ;; encoding response body
+                            muuntaja/format-response-middleware
+                            ;; exception handling
+                            ;(exception/create-exception-middleware
+                            ;  {::exception/default (partial exception/wrap-log-to-console exception/default-handler)})
+
+                            (exception/create-exception-middleware
+                              (merge
+                                exception/default-handlers
+                                {::exception/default                (partial exception/wrap-log-to-console default-ex-handler)
+                                 :ring.util.http-response/response  (partial exception/wrap-log-to-console default-ex-handler)
+                                 :muuntaja/decode                   (partial exception/wrap-log-to-console default-ex-handler)
+                                 :reitit.coercion/request-coercion  (coercion-error-handler 400)
+                                 :reitit.coercion/response-coercion (coercion-error-handler 500)}))
+                            ;; decoding request body
+                            ;; https://cljdoc.org/d/metosin/reitit/0.5.15/doc/ring/content-negotiation
+                            muuntaja/format-request-middleware
+                            ;; coercing response bodys
+                            coercion/coerce-response-middleware
+                            ;; coercing request parameters
+                            coercion/coerce-request-middleware
+                            ;; hot reload
+                            ;; https://stackoverflow.com/questions/59379314/how-to-make-a-ring-server-reload-on-file-change
+                            wrap-reload
+                            ;; multipart
+                            multipart/multipart-middleware]}})

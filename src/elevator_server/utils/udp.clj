@@ -1,6 +1,5 @@
 (ns elevator-server.utils.udp
   ;; https://stackoverflow.com/questions/14610957/how-to-rename-using-ns-require-refer/27122360#27122360
-  ;(:refer-clojure :rename {udp-server server})
   (:require
     [manifold.deferred :as d]
     [manifold.stream :as ms]
@@ -9,7 +8,7 @@
     [byte-streams :as bs]
     [clojure.core.match :refer [match]]
     [monger.collection :as mc]
-    [elevator-server.global :refer [db udp-server devices]]
+    [elevator-server.global :refer [db-udp udp-server devices] :rename {db-udp db}]
     [byte-streams :as bs]
     [spec-tools.data-spec :as ds]
     [octet.core :as buf]

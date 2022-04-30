@@ -14,16 +14,17 @@
     server))
 
 (def config {:http-api-port 3001
-             :udp-port 12345})
+             :udp-port      12345})
 
 (defstate conn
           "monger connection"
           :start (mg/connect)
-          :stop  (mg/disconnect conn))
+          :stop (mg/disconnect conn))
 
-(defstate db :start (mg/get-db conn "app"))
+(defstate db-udp :start (mg/get-db conn "app"))
+(defstate db-http :start (mg/get-db conn "app"))
 
-(defstate udp-server :start (do  (log/infof "start udp server at %d", (:udp-port config))
-                              (start-udp (:udp-port config))))
+(defstate udp-server :start (do (log/infof "start udp server at %d", (:udp-port config))
+                                (start-udp (:udp-port config))))
 
 (defstate devices :start (atom {}))
