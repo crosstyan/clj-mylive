@@ -89,9 +89,8 @@
 ;; https://github.com/metosin/reitit/blob/master/doc/ring/coercion.md
 ;; https://github.com/ring-clojure/ring/wiki/Concepts
 
-(defn create-app
+(def app
   "db is mongo db"
-  [db]
   (ring/ring-handler
     (ring/router
       [["/swagger.json"
@@ -155,8 +154,6 @@
          :config {:validatorUrl nil
                   :operationsSorter "alpha"}})
       (ring/create-default-handler))))
-
-(def app (create-app db))
 
 (defn start [port]
   ;; used for repl

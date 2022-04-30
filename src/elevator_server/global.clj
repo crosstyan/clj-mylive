@@ -16,6 +16,7 @@
 (def config {:http-api-port 3001
              :udp-port      12345})
 
+;; https://github.com/tolitius/mount/issues/77
 (defstate conn
           "monger connection"
           :start (mg/connect)
