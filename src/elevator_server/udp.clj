@@ -9,7 +9,7 @@
     [clojure.core.match :refer [match]]
     [monger.collection :as mc]
     [elevator-server.global :refer [db-udp udp-server devices] :rename {db-udp db}]
-    [elevator-server.utils.udp :as u-utils :refer [raw-msg->msg rand-by-hash byte-array->buf buf->byte-array send-back! byte-array->str rand-hex-arr MsgSpec MsgType sMsgType sErrCode]]
+    [elevator-server.utils.udp :as u-utils :refer [raw-msg->msg uint16->hex-str rand-by-hash byte-array->buf buf->byte-array send-back! byte-array->str rand-hex-arr MsgSpec MsgType sMsgType sErrCode]]
     [byte-streams :as bs]
     [spec-tools.data-spec :as ds]
     [octet.core :as buf]
@@ -90,21 +90,24 @@
                         buffer-w (buf/allocate (buf/size (:INIT_SERVER MsgSpec)))
                         hash (rand-by-hash id)
                         _ (buf/write! buffer-w [INIT hash] (:INIT_SERVER MsgSpec))
-                        e (byte-array [(:INIT sMsgType) (:ERR sErrCode)])]
+                        e (byte-array [(:INIT sMsgType) (:ERR sErrCode)])
+                        e-chan (rand-rtmp-emerg-chan)
+                        ]
                     (log/debugf "INIT %s" h-msg)
                     (if (not (nil? (mc/find-one db "device" {:id id})))
                       (do (swap! devices #(revoke-hash % id))
-                          (swap! devices #(assoc % hash {:id id :hash hash :last-msg stored}))
+                          (swap! devices #(assoc % hash {:id id :hash hash :last-msg stored :e-chan (uint16->hex-str e-chan)}))
                           (log/info "INIT" ":id" id)
                           (log/debugf "INIT %s from Server" (byte-array->str (.array buffer-w)))
                           (send-back! @udp-server recv buffer-w)
-                          (send-rtmp-emerg-resp hash @udp-server)) ;; send-emerg-key-without requesting
+                          (log/debug "INIT e-chan" (uint16->hex-str e-chan) e-chan)
+                          (send-rtmp-emerg-resp hash @udp-server e-chan)) ;; send-emerg-key-without requesting
                       (send-back! @udp-server recv e)))
            [RTMP_EMERG] (let [[_head hash] (buf/read buffer-r (:RTMP_EMERG_CLIENT MsgSpec))
                               dev (get @devices hash)
                               e-chan (rand-rtmp-emerg-chan)]
                           (if (not (nil? dev))
-                            (do (swap! devices #(assoc % hash (assoc dev :e-chan e-chan :last-msg stored))) ;swap e-chan and last msg
+                            (do (swap! devices #(assoc % hash (assoc dev :e-chan (uint16->hex-str e-chan) :last-msg stored))) ;swap e-chan and last msg
                                 (log/debugf "RTMP_EMERG %s" h-msg)
                                 (send-rtmp-emerg-resp hash @udp-server e-chan))))
            [HEARTBEAT] (let [spec (:HEARTBEAT MsgSpec)

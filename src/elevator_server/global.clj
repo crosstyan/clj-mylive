@@ -2,6 +2,7 @@
   (:require
     [monger.core :as mg]
     [aleph.udp :as udp]
+    [manifold.stream :as s]
     [mount.core :refer [defstate]]
     [clojure.tools.logging :as log]))
 
@@ -26,6 +27,10 @@
 (defstate db-http :start (mg/get-db conn "app"))
 
 (defstate udp-server :start (do (log/infof "start udp server at %d", (:udp-port config))
-                                (start-udp (:udp-port config))))
+                                (start-udp (:udp-port config)))
+          :stop (s/close! udp-server))
+
+(defstate app-bus :start (bus/event-bus)
+          :stop (s/close! app-bus))
 
 (defstate devices :start (atom {}))

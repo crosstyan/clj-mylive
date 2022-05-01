@@ -51,7 +51,7 @@
   {:id              integer?
    :hash            integer?
    (ds/opt :name)   string?                                 ; name
-   (ds/opt :e-chan) integer?
+   (ds/opt :e-chan) string?                                 ; hex representation of emergency channel
    :last-msg        stored-msg-spec
    (ds/opt :chan)   integer?})
 
@@ -87,16 +87,17 @@
 
 (def sErrCode (map-value unchecked-byte ErrCode))
 
-(defn short-to-bytes-array
+(defn int16->to-bytes-array
   "Convert a short (int16) to a byte array.
   equivalent to ByteBuffer.allocate(2).putShort(value).array()"
   [x] (.. ByteBuffer (allocate 2) (putShort x) (array)))
 
 ;; https://guava.dev/releases/22.0/api/docs/com/google/common/primitives/Ints.html
-(defn int-to-bytes-array
+(defn int32->bytes-array
   "Convert an integer (int32) to a byte array.
   equivalent to ByteBuffer.allocate(4).putInt(value).array()"
   [x] (. Ints toByteArray x))
+
 
 (defn buf->byte-array [^ByteBuffer buf]
   (.array buf))
@@ -197,3 +198,7 @@
 (defn msg-recv
   [server]
   (ms/map raw-msg->msg @server))
+
+(defn uint16->hex-str
+  "drop the first byte"
+  [x] (str/join (map hex->str (drop 2 (int32->bytes-array x)))))

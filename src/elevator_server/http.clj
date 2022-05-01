@@ -154,7 +154,9 @@
                :handler (fn [_req]
                           (let [devs (vals @devices)
                                 res (if (nil? devs) [] devs)]
-                            {:status 200 :body res}))}}]] opts)
+                            {:status 200 :body res}))}}]
+       ["/rtmp/devices/{id}"
+        {:swagger {:tags ["RTMP"]}}]] opts)
     (ring/routes
       (swagger-ui/create-swagger-ui-handler
         {:path "/swagger"
