@@ -159,7 +159,7 @@
   [msg]
   (let [addr (-> msg (:sender) (bean) (:address) (bean) (:hostAddress))
         port (-> msg (:sender) (bean) (:port))
-        timef (t/format  :iso-offset-date-time (t/zoned-date-time))]
+        timef (t/format :iso-offset-date-time (t/zoned-date-time))]
     {:host    addr
      :port    port
      :message (:message msg)
@@ -193,8 +193,8 @@
    @param `host` hostname or ip
    @param `port` port number"
   [server msg host port]
-  (ms/put! server {:host host
-                   :port port
+  (ms/put! server {:host    host
+                   :port    port
                    :message msg}))
 
 ;; make a stream pipeline
