@@ -2,6 +2,7 @@
   (:require
     [monger.core :as mg]
     [aleph.udp :as udp]
+    [manifold.bus :as bus]
     [manifold.stream :as s]
     [mount.core :refer [defstate]]
     [clojure.tools.logging :as log]))

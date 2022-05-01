@@ -4,9 +4,12 @@
              [manifold.stream :as ms]
              [manifold.bus :as bus]
              [clojure.data.json :as json]
-             [elevator-server.global :refer [conn db-http devices] :rename {db-http db}]
+             [elevator-server.global :refer [conn db-http devices udp-server] :rename {db-http db}]
              [elevator-server.utils.core :refer [nil?-or]]
-             [elevator-server.utils.http :refer [opts coercion-error-handler]]
+             [elevator-server.utils.http :refer [opts]]
+             [elevator-server.utils.udp :refer [int32->hex-str send-back!
+                                                rand-rtmp-stream-chan
+                                                create-rtmp-stream-req]]
              [monger.core :as mg]
              [monger.collection :as mc]
              [clojure.pprint :as pp]
@@ -30,7 +33,7 @@
 ;; https://github.com/metosin/reitit/blob/master/examples/ring-swagger/src/example/server.clj
 
 ;(def rtmp-events (ms/buffered-stream 20))
-(def rtmp-events (bus/event-bus))
+(def rtmp-events (ms/stream 10))
 
 (def non-websocket-request
   {:status 400
@@ -46,7 +49,7 @@
               (if-not conn
                 ;; if it wasn't a valid websocket handshake, return an error
                 non-websocket-request
-                (md/let-flow [rtmp (bus/subscribe rtmp-events :e)]
+                (md/let-flow [rtmp rtmp-events]
                             ;; take all messages from the rtmp, and feed them to the client
                              (ms/connect rtmp conn)
                             nil))))
@@ -74,6 +77,9 @@
                (map #(dissoc % :_id)))]
     {:status 200 :body docs}))
 
+(defn get-dev-by-id [m id]
+  (first (filter #(= (:id %) id) (vals m))))
+
 (defn device-post-handler [req db]
   (let [{{b :body} :parameters} req
         ;; TODO purify the input before insert
@@ -99,20 +105,6 @@
                                 :description "with reitit-ring"}}
                :handler (swagger/create-swagger-handler)}}]
 
-       ["/hello"
-        {:swagger {:tags ["hello"]}
-         ;; hand writing swagger
-         ;; https://github.com/metosin/spec-tools/blob/master/docs/05_swagger.md
-         :get {:swagger
-                 {:parameters [{:in "query"
-                                :schema (swag/transform int? {:type :parameter :in :query})
-                                :name "some number"
-                                :description "it's an int, with no use"
-                                :example 42
-                                :default 42}]}
-               :summary "say hello"
-               :responses {200 {:body {:hello string?}}}
-               :handler (constantly {:status 200 :body {:hello "world!"}})}}]
        ["/devices"
         {:swagger {:tags ["devices"]}
          :get {:summary "get all available devices with mongo"
@@ -145,18 +137,42 @@
                 :parameters {:body {:name string? :cmd string?}}
                 :handler (fn [req]
                            (let [{{b :body} :parameters} req]
-                             (do
-                               (bus/publish! rtmp-events :e (json/write-str b))
-                               {:status 200})))}}]
+                             (do (ms/put! rtmp-events (json/write-str b))
+                                 {:status 200})))}}]
        ["/rtmp/devices"
         {:swagger {:tags ["RTMP"]}
          :get {:summary "get online devices"
+               ;; TODO https://clojuredocs.org/clojure.core/subvec
                :handler (fn [_req]
                           (let [devs (vals @devices)
                                 res (if (nil? devs) [] devs)]
                             {:status 200 :body res}))}}]
        ["/rtmp/devices/{id}"
-        {:swagger {:tags ["RTMP"]}}]] opts)
+        {:swagger {:tags ["RTMP"]}
+         :get {:summary "get online devices of id"
+               :parameters {:path (s/keys :req-un [:dev/id])}
+               :handler (fn [{{{:keys [id]} :path} :parameters}]
+                          (let [dev (get-dev-by-id @devices id)]
+                            (if (not (nil? dev))
+                              {:status 200 :body dev}
+                              {:status 404 :body {:result "not found"}})))}}]
+       ["/rtmp/devices/{id}/start"
+        {:swagger {:tags ["RTMP"]}
+         :get {:summary "start stream on certain device"
+               :parameters {:path (s/keys :req-un [:dev/id])}
+               :handler (fn [{{{:keys [id]} :path} :parameters}]
+                          (let [dev (get-dev-by-id @devices id)
+                                ]
+                            (if (not (nil? dev))
+                              (let [hash (:hash dev)
+                                    l-msg (:last-msg dev)
+                                    chan (rand-rtmp-stream-chan)
+                                    req (create-rtmp-stream-req hash chan)]
+                                (send-back! @udp-server l-msg req)
+                                {:status 200 :body {:result "success"}})
+                              {:status 404 :body {:result "not found"}}))
+                          )}}]
+       ] opts)
     (ring/routes
       (swagger-ui/create-swagger-ui-handler
         {:path "/swagger"

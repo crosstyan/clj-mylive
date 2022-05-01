@@ -8,54 +8,18 @@
     [byte-streams :as bs]
     [clojure.core.match :refer [match]]
     [monger.collection :as mc]
-    [elevator-server.global :refer [db-udp udp-server devices] :rename {db-udp db}]
-    [elevator-server.utils.udp :as u-utils :refer [raw-msg->msg uint16->hex-str rand-by-hash byte-array->buf buf->byte-array send-back! byte-array->str rand-hex-arr MsgSpec MsgType sMsgType sErrCode]]
+    [elevator-server.global :refer [db-udp udp-server devices app-bus] :rename {db-udp db}]
+    [elevator-server.utils.udp :as u-utils :refer :all]
     [byte-streams :as bs]
     [spec-tools.data-spec :as ds]
     [octet.core :as buf]
     [clojure.core.match :refer [match]]
-    [clojure.tools.logging :as log])
+    [clojure.tools.logging :as log]
+    [manifold.bus :as bus])
   (:import
     (com.google.common.primitives Ints UnsignedInts Shorts)
     (java.io ByteArrayOutputStream)
     (java.nio ByteBuffer)))
-
-
-
-
-(defn revoke-hash
-  "remove {hash:int device:device} from global devices list"
-  [m id]
-  (let [devices (vals m)
-        devs-with-id (filter (fn [d] (= (:id d) 123)) devices)
-        hashes (map #(:hash %) devs-with-id)]
-    (if (not (empty? hashes))
-      (apply (partial dissoc m) hashes)
-      m)))
-
-(defn rand-rtmp-emerg-chan []
-  (let [int16-ba (byte-array (map unchecked-byte (rand-hex-arr 2)))
-        int16 (. Shorts fromByteArray int16-ba)
-        int16-c0 (bit-or 0xc000 int16)]
-    int16-c0))
-
-(defn rand-rtmp-stream-chan []
-  (let [int16-ba (byte-array (map unchecked-byte (rand-hex-arr 2)))
-        int16 (bit-and 0x3fff (. Shorts fromByteArray int16-ba))]
-    int16))
-
-(defn create-rtmp-emerg-resp
-  "create a RTMP_EMERG msg
-   hash is int32
-   return [byte-array chan: int16]"
-  ([hash chan]
-   (let [spec (:RTMP_EMERG_SERVER MsgSpec)
-         head (:RTMP_EMERG sMsgType)
-         buffer (buf/allocate (buf/size spec))]
-     (do
-       (buf/write! buffer [head hash chan] spec)
-       [buffer chan])))
-  ([hash] (create-rtmp-emerg-resp hash (rand-rtmp-emerg-chan))))
 
 
 (defn send-rtmp-emerg-resp
@@ -66,7 +30,7 @@
      (if (not (nil? dev))
        (do
          (log/debugf "RTMP_EMERG %s from Server" (byte-array->str (.array buffer-w)))
-         (u-utils/send! server buffer-w (:host l-msg) (:port l-msg))
+         (send-back! server l-msg buffer-w)
          nil))))
   ([hash server] (send-rtmp-emerg-resp hash server (rand-rtmp-emerg-chan))))
 
@@ -91,8 +55,7 @@
                         hash (rand-by-hash id)
                         _ (buf/write! buffer-w [INIT hash] (:INIT_SERVER MsgSpec))
                         e (byte-array [(:INIT sMsgType) (:ERR sErrCode)])
-                        e-chan (rand-rtmp-emerg-chan)
-                        ]
+                        e-chan (rand-rtmp-emerg-chan)]
                     (log/debugf "INIT %s" h-msg)
                     (if (not (nil? (mc/find-one db "device" {:id id})))
                       (do (swap! devices #(revoke-hash % id))
@@ -110,13 +73,23 @@
                             (do (swap! devices #(assoc % hash (assoc dev :e-chan (uint16->hex-str e-chan) :last-msg stored))) ;swap e-chan and last msg
                                 (log/debugf "RTMP_EMERG %s" h-msg)
                                 (send-rtmp-emerg-resp hash @udp-server e-chan))))
+           [RTMP_STREAM] (let [[_head hash code] (buf/read buffer-r (:RTMP_STREAM_CLIENT MsgSpec))
+                               dev (get @devices hash)]
+                           (if (not (nil? dev))
+                             (do (swap! devices #(assoc % hash (assoc dev :last-msg stored)))
+                                 (log/debugf "RTMP_STREAM %s" h-msg)
+                                 (bus/publish! app-bus (keyword (str/join "RTMP_STREAM" (int32->hex-str hash)))
+                                               (cond
+                                                 (= code (:OK sErrCode)) :ok
+                                                 (= code (:BUSY sErrCode)) :busy
+                                                 :else :err)))))
            [HEARTBEAT] (let [spec (:HEARTBEAT MsgSpec)
                              [_head hash] (buf/read buffer-r spec)
                              dev (get @devices hash)]
                          (log/infof "HEARTBEAT %s" h-msg)
                          (if (not (nil? dev))
                            (do (swap! devices #(assoc % hash (assoc dev :last-msg stored))))))
-           :else       nil)))
+           :else nil)))
 
 (defn start []
   "start udp server"

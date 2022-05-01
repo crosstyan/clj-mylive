@@ -99,6 +99,7 @@
   [x] (. Ints toByteArray x))
 
 
+
 (defn buf->byte-array [^ByteBuffer buf]
   (.array buf))
 
@@ -135,6 +136,8 @@
 (defn byte-array->str
   "convert byte array to hex string"
   [ba] (str/join (map hex->str (vec ba))))
+
+(defn int32->hex-str [x] (byte-array->str (int32->bytes-array x)))
 
 ;; 0 to 255. 256 is exclusive
 (defn rand-hex-arr
@@ -202,3 +205,50 @@
 (defn uint16->hex-str
   "drop the first byte"
   [x] (str/join (map hex->str (drop 2 (int32->bytes-array x)))))
+
+(defn revoke-hash
+  "remove {hash:int device:device} from global devices list"
+  [m id]
+  (let [devices (vals m)
+        devs-with-id (filter (fn [d] (= (:id d) id)) devices)
+        hashes (map #(:hash %) devs-with-id)]
+    (if (not (empty? hashes))
+      (apply (partial dissoc m) hashes)
+      m)))
+
+(defn rand-rtmp-emerg-chan []
+  (let [int16-ba (byte-array (map unchecked-byte (rand-hex-arr 2)))
+        int16 (. Shorts fromByteArray int16-ba)
+        int16-c0 (bit-or 0xc000 int16)]
+    int16-c0))
+
+(defn rand-rtmp-stream-chan []
+  (let [int16-ba (byte-array (map unchecked-byte (rand-hex-arr 2)))
+        int16 (bit-and 0x3fff (. Shorts fromByteArray int16-ba))]
+    int16))
+
+(defn create-rtmp-stream-req
+  "create a RTMP_EMERG msg
+   hash is int32
+   return [byte-array chan: int16]"
+  ([hash chan]
+   (let [spec (:RTMP_STREAM_SERVER MsgSpec)
+         head (:RTMP_STREAM sMsgType)
+         buffer (buf/allocate (buf/size spec))]
+     (do
+       (buf/write! buffer [head hash chan] spec)
+       [buffer chan])))
+  ([hash] (create-rtmp-stream-req hash (rand-rtmp-stream-chan))))
+
+(defn create-rtmp-emerg-resp
+  "create a RTMP_EMERG msg
+   hash is int32
+   return [byte-array chan: int16]"
+  ([hash chan]
+   (let [spec (:RTMP_EMERG_SERVER MsgSpec)
+         head (:RTMP_EMERG sMsgType)
+         buffer (buf/allocate (buf/size spec))]
+     (do
+       (buf/write! buffer [head hash chan] spec)
+       [buffer chan])))
+  ([hash] (create-rtmp-emerg-resp hash (rand-rtmp-emerg-chan))))
