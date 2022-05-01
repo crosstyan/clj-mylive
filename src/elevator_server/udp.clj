@@ -9,7 +9,7 @@
     [clojure.core.match :refer [match]]
     [monger.collection :as mc]
     [elevator-server.global :refer [db-udp udp-server devices app-bus] :rename {db-udp db}]
-    [elevator-server.utils.udp :as u-utils :refer :all]
+    [elevator-server.utils.udp :refer :all]
     [byte-streams :as bs]
     [spec-tools.data-spec :as ds]
     [octet.core :as buf]

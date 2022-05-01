@@ -16,7 +16,7 @@
     [octet.core :as buf]
     [clojure.core.match :refer [match]])
   (:import
-    (com.google.common.primitives Ints UnsignedInts)
+    (com.google.common.primitives Ints UnsignedInts Shorts)
     (java.io ByteArrayOutputStream)
     (java.nio ByteBuffer)))
 
@@ -29,10 +29,10 @@
   (instance? ByteArray ba))
 
 (def stored-msg
-  {:message       byte-array?
+  {:message       string?
    :port          integer?
    :host          string?
-   (ds/opt :time) integer?})
+   (ds/opt :time) string?})
 
 (def stored-msg-spec
   (ds/spec {:name ::stored-msg
@@ -173,13 +173,13 @@
   [server recv-msg msg]
   (cond
     (stored-msg? recv-msg)
-    (ms/put! server {:host    (:host stored-msg)
-                     :port    (:port stored-msg)
+    (ms/put! server {:host    (:host recv-msg)
+                     :port    (:port recv-msg)
                      :message msg})
     (raw-msg? recv-msg)
-    (let [stored-msg (raw-msg->msg recv-msg)]
-      (ms/put! server {:host    (:host stored-msg)
-                       :port    (:port stored-msg)
+    (let [conv (raw-msg->msg recv-msg)]
+      (ms/put! server {:host    (:host conv)
+                       :port    (:port conv)
                        :message msg}))
     :else
     (throw (Exception.
@@ -230,7 +230,7 @@
 (defn create-rtmp-stream-req
   "create a RTMP_EMERG msg
    hash is int32
-   return [byte-array chan: int16]"
+   return [ByteBuffer chan: int16]"
   ([hash chan]
    (let [spec (:RTMP_STREAM_SERVER MsgSpec)
          head (:RTMP_STREAM sMsgType)

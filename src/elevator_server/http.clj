@@ -4,13 +4,14 @@
             [manifold.stream :as ms]
             [manifold.bus :as bus]
             [clojure.data.json :as json]
-            [elevator-server.global :refer [conn db-http devices udp-server] :rename {db-http db}]
+            [elevator-server.global :refer [conn db-http app-bus devices udp-server] :rename {db-http db}]
             [elevator-server.utils.core :refer [nil?-or]]
             [elevator-server.utils.http :refer [opts]]
-            [elevator-server.utils.udp :refer [int32->hex-str send-back!
-                                               rand-rtmp-stream-chan
-                                               create-rtmp-stream-req]]
+            [elevator-server.utils.udp :as u-udp :refer [int32->hex-str send-back!
+                                                         rand-rtmp-stream-chan
+                                                         create-rtmp-stream-req]]
             [monger.core :as mg]
+            [clojure.core.match :refer [match]]
             [monger.collection :as mc]
             [clojure.pprint :as pp]
             [reitit.ring :as ring]
@@ -26,7 +27,8 @@
             [spec-tools.core :as st]
             [spec-tools.swagger.core :as swag]
             [ring.middleware.reload :refer [wrap-reload]]
-            [monger.conversion :refer [from-db-object]]))
+            [monger.conversion :refer [from-db-object]]
+            [clojure.string :as str]))
 
 
 ;; example from
@@ -166,12 +168,22 @@
                                    (if (not (nil? dev))
                                      (let [hash (:hash dev)
                                            l-msg (:last-msg dev)
-                                           chan (rand-rtmp-stream-chan)
-                                           req (create-rtmp-stream-req hash chan)]
-                                       (send-back! @udp-server l-msg req)
-                                       {:status 200 :body {:result "success"}})
-                                     {:status 404 :body {:result "not found"}}))
-                                 )}}]
+                                           [req chan] (create-rtmp-stream-req hash)
+                                           topic (keyword (keyword (str/join "RTMP_STREAM" (int32->hex-str hash))))
+                                           eb (bus/subscribe app-bus topic)]
+                                       ;; TODO: use multimethod to support both byte-array and ByteBuffer
+                                       (log/debugf "RTMP_STREAM %s from Server" (u-udp/byte-array->str (.array req)))
+                                       (send-back! @udp-server l-msg (.array req))
+                                       (let [val @(ms/try-take! eb :err 5000 :timeout)]
+                                         (log/debug "From UDP to HTTP" (name val))
+                                         (match [val]
+                                                [:ok] {:statuss 200 :body {:chan (u-udp/uint16->hex-str chan)}}
+                                                [:err] {:status 500 :body {:result "error"}}
+                                                [:busy] {:status 409 :body {:result "busy"}}
+                                                [:timeout] {:status 504 :body {:result "timeout"
+                                                                               :chan (u-udp/uint16->hex-str chan)}}
+                                                :else {:status 500 :body {:result "error"}})))
+                                     {:status 404 :body {:result "not found"}})))}}]
        ] opts)
     (ring/routes
       (swagger-ui/create-swagger-ui-handler

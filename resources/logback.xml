@@ -1,5 +1,6 @@
 <configuration>
 
+    <!--https://stackoverflow.com/questions/5653062/how-can-i-configure-logback-to-log-different-levels-for-a-logger-to-different-de-->
     <property name="HOME_LOG" value="logs/app.log"/>
 
     <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -16,7 +17,7 @@
         </rollingPolicy>
 
         <encoder>
-            <pattern> %d{HH:mm:ss.SSS} [%t] %-5level %logger{10} - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{10} - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -28,14 +29,26 @@
         </encoder>
     </appender>
 
+    <appender name="CONSOLE_DEBUG" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%d{HH:mm:ss.SSS} %-5level %logger{10} - %msg%n</Pattern>
+        </encoder>
+    </appender>
 
     <root level="info">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE-ROLLING"/>
     </root>
     <logger name="elevator-server.udp" level="debug">
-        <appender-ref ref="CONSOLE"/>
-        <appender-ref ref="FILE-ROLLING"/>
+        <appender-ref ref="CONSOLE_DEBUG"/>
+    </logger>
+    <logger name="elevator-server.http" level="debug">
+        <appender-ref ref="CONSOLE_DEBUG"/>
     </logger>
 
 </configuration>
