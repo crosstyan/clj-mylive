@@ -73,14 +73,16 @@
                             (do (swap! devices #(assoc % hash (assoc dev :e-chan (uint16->hex-str e-chan) :last-msg stored))) ;swap e-chan and last msg
                                 (log/debugf "RTMP_EMERG %s" h-msg)
                                 (send-rtmp-emerg-resp hash @udp-server e-chan))))
-           [RTMP_STREAM] (let [[_head hash code] (buf/read buffer-r (:RTMP_STREAM_CLIENT MsgSpec))
+           [RTMP_STREAM] (let [[_head hash chan code] (buf/read buffer-r (:RTMP_STREAM_CLIENT MsgSpec))
+                               chan-hex (uint16->hex-str chan)
                                dev (get @devices hash)]
                            (if (not (nil? dev))
                              (do (swap! devices #(assoc % hash (assoc dev :last-msg stored)))
                                  (log/debugf "RTMP_STREAM %s" h-msg)
                                  (bus/publish! app-bus (keyword (str/join "RTMP_STREAM" (int32->hex-str hash)))
                                                (cond
-                                                 (= code (:OK sErrCode)) :ok
+                                                 (= code (:OK sErrCode)) (do (swap! devices #(assoc % hash (assoc dev :chan chan-hex)))
+                                                                             :ok)
                                                  (= code (:BUSY sErrCode)) :busy
                                                  :else :err)))))
            [HEARTBEAT] (let [spec (:HEARTBEAT MsgSpec)

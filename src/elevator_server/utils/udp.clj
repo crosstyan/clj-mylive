@@ -75,7 +75,7 @@
               :RTMP_EMERG_CLIENT  (buf/spec buf/byte buf/int32) ;; type hash
               :RTMP_EMERG_SERVER  (buf/spec buf/byte buf/int32 buf/uint16) ;; type hash chn (note chn is unsigned)
               :RTMP_STREAM_SERVER (buf/spec buf/byte buf/int32 buf/uint16) ;; type hash chn (note chn is unsigned)
-              :RTMP_STREAM_CLIENT (buf/spec buf/byte buf/int32 buf/byte) ;; type hash err
+              :RTMP_STREAM_CLIENT (buf/spec buf/byte buf/int32 buf/uint16 buf/byte) ;; type hash err
               :HEARTBEAT          (buf/spec buf/byte buf/int32) ;; type hash
               })
 

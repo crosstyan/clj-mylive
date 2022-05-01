@@ -169,6 +169,7 @@
                                      (let [hash (:hash dev)
                                            l-msg (:last-msg dev)
                                            [req chan] (create-rtmp-stream-req hash)
+                                           chan-hex (u-udp/uint16->hex-str chan)
                                            topic (keyword (keyword (str/join "RTMP_STREAM" (int32->hex-str hash))))
                                            eb (bus/subscribe app-bus topic)]
                                        ;; TODO: use multimethod to support both byte-array and ByteBuffer
@@ -177,11 +178,10 @@
                                        (let [val @(ms/try-take! eb :err 5000 :timeout)]
                                          (log/debug "From UDP to HTTP" (name val))
                                          (match [val]
-                                                [:ok] {:statuss 200 :body {:chan (u-udp/uint16->hex-str chan)}}
+                                                [:ok] {:statuss 200 :body {:chan chan-hex}}
                                                 [:err] {:status 500 :body {:result "error"}}
                                                 [:busy] {:status 409 :body {:result "busy"}}
-                                                [:timeout] {:status 504 :body {:result "timeout"
-                                                                               :chan (u-udp/uint16->hex-str chan)}}
+                                                [:timeout] {:status 504 :body {:result "timeout"}}
                                                 :else {:status 500 :body {:result "error"}})))
                                      {:status 404 :body {:result "not found"}})))}}]
        ] opts)
