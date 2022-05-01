@@ -4,7 +4,7 @@
              [manifold.stream :as ms]
              [manifold.bus :as bus]
              [clojure.data.json :as json]
-             [elevator-server.global :refer [conn db-http] :rename {db-http db}]
+             [elevator-server.global :refer [conn db-http devices] :rename {db-http db}]
              [elevator-server.utils.core :refer [nil?-or]]
              [elevator-server.utils.http :refer [opts coercion-error-handler]]
              [monger.core :as mg]
@@ -63,7 +63,7 @@
 ;; Alt + Shift + R replace to current workspace
 
 
-(defn device-get-handler [req db]
+  (defn device-get-handler [req db]
   (let [{{{:keys [page elems]} :query} :parameters} req
         page (nil?-or page 0)
         elems (nil?-or elems 10)
@@ -113,8 +113,8 @@
                :summary "say hello"
                :responses {200 {:body {:hello string?}}}
                :handler (constantly {:status 200 :body {:hello "world!"}})}}]
-       ["/device"
-        {:swagger {:tags ["device"]}
+       ["/devices"
+        {:swagger {:tags ["devices"]}
          :get {:summary "get all available devices with mongo"
                :coercion rcs/coercion
                :parameters {:query (s/keys :opt-un [:s/page :s/elems])}
@@ -125,8 +125,8 @@
                 :parameters {:body :s/device}
                 :responses {200 {:body {:result string?}}}
                 :handler #(device-post-handler % db)}}]
-       ["/device/{id}"
-        {:swagger {:tags ["device"]}
+       ["/devices/{id}"
+        {:swagger {:tags ["devices"]}
          :get {:summary "get certain device"
                :parameters {:path (s/keys :req-un [:dev/id])}
                :responses {200 {:body :s/device}}
@@ -147,7 +147,14 @@
                            (let [{{b :body} :parameters} req]
                              (do
                                (bus/publish! rtmp-events :e (json/write-str b))
-                               {:status 200})))}}]] opts)
+                               {:status 200})))}}]
+       ["/rtmp/devices"
+        {:swagger {:tags ["RTMP"]}
+         :get {:summary "get online devices"
+               :handler (fn [_req]
+                          (let [devs (vals @devices)
+                                res (if (nil? devs) [] devs)]
+                            {:status 200 :body res}))}}]] opts)
     (ring/routes
       (swagger-ui/create-swagger-ui-handler
         {:path "/swagger"

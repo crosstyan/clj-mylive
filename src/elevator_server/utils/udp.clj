@@ -10,7 +10,9 @@
     [monger.collection :as mc]
     [elevator-server.global :refer [db-udp udp-server devices] :rename {db-udp db}]
     [byte-streams :as bs]
+    [clojure.spec.alpha :as s]
     [spec-tools.data-spec :as ds]
+    [tick.core :as t]
     [octet.core :as buf]
     [clojure.core.match :refer [match]])
   (:import
@@ -18,11 +20,44 @@
     (java.io ByteArrayOutputStream)
     (java.nio ByteBuffer)))
 
-;(do (swap! sMsgType (constantly {}))
-;    (doseq
-;      [k (keys MsgType)]
-;      (let [v (k MsgType)]
-;        (swap! sMsgType #(assoc % k (unchecked-byte v))))))
+(def ByteArray
+  "ByteArray is the class name of a byte array."
+  (class (byte-array [0x00 0xff])))
+
+(defn byte-array? [ba]
+  ;; create a byte array and get it type
+  (instance? ByteArray ba))
+
+(def stored-msg
+  {:message       byte-array?
+   :port          integer?
+   :host          string?
+   (ds/opt :time) integer?})
+
+(def stored-msg-spec
+  (ds/spec {:name ::stored-msg
+            :spec stored-msg
+            :time string?}))
+
+(defn stored-msg? [msg]
+  (s/valid? stored-msg-spec msg))
+
+(defn raw-msg?
+  [msg] (instance? aleph.udp.UdpPacket msg))
+
+;; device info in global variables
+;; not in database
+(def device
+  {:id              integer?
+   :hash            integer?
+   (ds/opt :name)   string?                                 ; name
+   (ds/opt :e-chan) integer?
+   :last-msg        stored-msg-spec
+   (ds/opt :chan)   integer?})
+
+(def device-spec
+  (ds/spec {:name ::device
+            :spec device}))
 
 (def MsgType {:INIT        0x70
               :RTMP_EMERG  0x77
@@ -38,8 +73,8 @@
               :INIT_SERVER        (buf/spec buf/byte buf/int32) ;; type hash
               :INIT_ERROR         (buf/spec buf/byte buf/byte) ;; type hash
               :RTMP_EMERG_CLIENT  (buf/spec buf/byte buf/int32) ;; type hash
-              :RTMP_EMERG_SERVER  (buf/spec buf/byte buf/int32 buf/int16) ;; type hash chn
-              :RTMP_STREAM_SERVER (buf/spec buf/byte buf/int32 buf/int16) ;; type hash chn
+              :RTMP_EMERG_SERVER  (buf/spec buf/byte buf/int32 buf/uint16) ;; type hash chn (note chn is unsigned)
+              :RTMP_STREAM_SERVER (buf/spec buf/byte buf/int32 buf/uint16) ;; type hash chn (note chn is unsigned)
               :RTMP_STREAM_CLIENT (buf/spec buf/byte buf/int32 buf/byte) ;; type hash err
               :HEARTBEAT          (buf/spec buf/byte buf/int32) ;; type hash
               })
@@ -63,13 +98,20 @@
   equivalent to ByteBuffer.allocate(4).putInt(value).array()"
   [x] (. Ints toByteArray x))
 
+(defn buf->byte-array [^ByteBuffer buf]
+  (.array buf))
+
+(defn byte-array->buf [arr]
+  (. ByteBuffer wrap arr))
+
+
 (defn concat-bytes-array [xs & yss]
   (let [stream (ByteArrayOutputStream.)]
     (.write stream xs)
     (run! (fn [ys] (.write stream ys)) yss)
     (.toByteArray stream)))
 
-(defn as-unsigned [x]
+(defn as-unsigned
   "Interpret an int32 as unsigned."
   [x] (BigInteger. (. UnsignedInts toString x)))
 
@@ -84,12 +126,14 @@
   ([]
    (hash [(now-unix-time-seconds) "salt"])))
 
+;; TODO: use protocol or multimethod
 (defn hex->str
-  "convert hex number to human-readable string"
+  "convert a byte to hex"
   [x] (format "%02x" x))
 
-(defn byte-array->str [ba]
-  (str/join (map hex->str (vec ba))))
+(defn byte-array->str
+  "convert byte array to hex string"
+  [ba] (str/join (map hex->str (vec ba))))
 
 ;; 0 to 255. 256 is exclusive
 (defn rand-hex-arr
@@ -110,30 +154,43 @@
   {:host, :port, :message, :vertor, :string}"
   [msg]
   (let [addr (-> msg (:sender) (bean) (:address) (bean) (:hostAddress))
-        port (-> msg (:sender) (bean) (:port))]
+        port (-> msg (:sender) (bean) (:port))
+        timef (t/format  :iso-offset-date-time (t/zoned-date-time))]
     {:host    addr
      :port    port
-     :message (:message msg)}))
+     :message (:message msg)
+     :time    timef}))
 
 (defn send-back!
   "send msg to the sender of recv-msg by server
    @param `server` a `aleph.udp/socket` or any `manifold.stream`
-   @param `recv-msg` raw msg received by `manifold.stream`
+   @param `recv-msg` raw msg received by `manifold.stream` or a map follow `stored-msg-spec`
    @param `msg` string or bytes-array"
-  [server raw-msg msg]
-  (let [stored-msg (raw-msg->msg raw-msg)]
+  [server recv-msg msg]
+  (cond
+    (stored-msg? recv-msg)
     (ms/put! server {:host    (:host stored-msg)
                      :port    (:port stored-msg)
-                     :message msg})))
+                     :message msg})
+    (raw-msg? recv-msg)
+    (let [stored-msg (raw-msg->msg recv-msg)]
+      (ms/put! server {:host    (:host stored-msg)
+                       :port    (:port stored-msg)
+                       :message msg}))
+    :else
+    (throw (Exception.
+             (format "send-back! expects a stored-msg or raw-msg
+                      (aleph.udp.UdpPacket). Get %s" (class recv-msg))))))
 
 (defn send!
-  "send msg to the sender of recv-msg by server
+  "send msg to the specified host and port
    @param `server` a `aleph.udp/socket` or any `manifold.stream`
-   @param `stored-msg` a map with {:host, :port, :message}
-   @param `msg` string or bytes-array"
-  [server stored-msg msg]
-  (ms/put! server {:host    (:host stored-msg)
-                   :port    (:port stored-msg)
+   @param `msg` string or bytes-array
+   @param `host` hostname or ip
+   @param `port` port number"
+  [server msg host port]
+  (ms/put! server {:host host
+                   :port port
                    :message msg}))
 
 ;; make a stream pipeline

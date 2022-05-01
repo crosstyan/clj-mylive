@@ -23,6 +23,7 @@
                                              io.netty/netty-resolver]]
                  [com.longyb/mylive "0.0.1" :exclusions [io.netty/netty-all
                                                          ch.qos.logback/logback-classic]]
+                 [tick "0.5.0-RC5"]
                  [metosin/reitit "0.5.18"]
                  [com.google.guava/guava "31.1-jre" :exclusions [org.slf4j/slf4j-api
                                                              org.slf4j/slf4j-log4j12
