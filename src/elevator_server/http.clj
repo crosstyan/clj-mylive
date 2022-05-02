@@ -9,7 +9,8 @@
             [elevator-server.utils.http :refer [opts]]
             [elevator-server.utils.udp :as u-udp :refer [int32->hex-str send-back!
                                                          rand-rtmp-stream-chan
-                                                         create-rtmp-stream-req]]
+                                                         create-rtmp-stream-req
+                                                         create-rtmp-stop-req]]
             [monger.core :as mg]
             [clojure.core.match :refer [match]]
             [monger.collection :as mc]
@@ -206,6 +207,29 @@
                                            :ok {:statuss 200 :body {:chan chan-hex}}
                                            :err {:status 500 :body {:result "error"}}
                                            :busy {:status 409 :body {:result "busy"}}
+                                           :timeout {:status 504 :body {:result "timeout"}}
+                                           {:status 500 :body {:result "error"}})))
+                                     {:status 404 :body {:result "not found"}})))}}]
+
+       ["/rtmp/devices/{id}/stop"
+        {:swagger {:tags ["RTMP"]}
+         :get     {:summary    "stop stream on certain device"
+                   :parameters {:path (s/keys :req-un [:dev/id])}
+                   :handler    (fn [{{{:keys [id]} :path} :parameters}]
+                                 (let [dev (get-dev-by-id @devices id)]
+                                   (if-not (nil? dev)
+                                     (let [hash (:hash dev)
+                                           l-msg (:last-msg dev)
+                                           req (create-rtmp-stop-req hash)
+                                           topic (keyword (keyword (str/join "RTMP_STOP" (int32->hex-str hash))))
+                                           eb (bus/subscribe app-bus topic)]
+                                       ;; TODO: use multimethod to support both byte-array and ByteBuffer
+                                       (log/debugf "RTMP_STOP %s from Server" (u-udp/byte-array->str (.array req)))
+                                       (send-back! @udp-server l-msg (.array req))
+                                       (let [val @(ms/try-take! eb :err 5000 :timeout)]
+                                         (log/debug "From UDP to HTTP" (name val))
+                                         (condp = val
+                                           :ok {:statuss 200 :body {:result "ok"}}
                                            :timeout {:status 504 :body {:result "timeout"}}
                                            {:status 500 :body {:result "error"}})))
                                      {:status 404 :body {:result "not found"}})))}}]

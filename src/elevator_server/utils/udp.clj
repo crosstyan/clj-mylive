@@ -62,6 +62,7 @@
 (def MsgType {:INIT        0x70
               :RTMP_EMERG  0x77
               :RTMP_STREAM 0x75
+              :RTMP_STOP   0x76
               :HEARTBEAT   0x64})
 
 (def ErrCode {:OK   0xff
@@ -74,10 +75,16 @@
 (def MsgSpec {:INIT_CLIENT        (buf/spec buf/byte buf/int16) ;; type id
               :INIT_SERVER        (buf/spec buf/byte buf/int32) ;; type hash
               :INIT_ERROR         (buf/spec buf/byte buf/byte) ;; type hash
+
               :RTMP_EMERG_CLIENT  (buf/spec buf/byte buf/int32) ;; type hash
               :RTMP_EMERG_SERVER  (buf/spec buf/byte buf/int32 buf/uint16) ;; type hash chn (note chn is unsigned)
+
               :RTMP_STREAM_SERVER (buf/spec buf/byte buf/int32 buf/uint16) ;; type hash chn (note chn is unsigned)
               :RTMP_STREAM_CLIENT (buf/spec buf/byte buf/int32 buf/uint16 buf/byte) ;; type hash err
+
+              :RTMP_STOP_SERVER (buf/spec buf/byte buf/int32) ;; type hash
+              :RTMP_STOP_CLIENT (buf/spec buf/byte buf/int32 buf/byte) ;; type hash err
+
               :HEARTBEAT          (buf/spec buf/byte buf/int32) ;; type hash
               })
 
@@ -227,6 +234,14 @@
   (let [int16-ba (byte-array (map unchecked-byte (rand-hex-arr 2)))
         int16 (bit-and 0x3fff (. Shorts fromByteArray int16-ba))]
     int16))
+
+(defn create-rtmp-stop-req
+  [hash]
+  (let [spec (:RTMP_STOP_SERVER MsgSpec)
+        head (:RTMP_STOP sMsgType)
+        buffer (buf/allocate (buf/size spec))]
+    (do (buf/write! buffer [head hash] spec)
+        buffer)))
 
 (defn create-rtmp-stream-req
   "create a RTMP_EMERG msg

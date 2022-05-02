@@ -84,6 +84,17 @@
                                                (:BUSY_STREAM sErrCode) :busy
                                                ;; https://stackoverflow.com/questions/1242819/how-do-i-write-else-in-condp-in-clojure
                                                :err)))))
+
+      (:RTMP_STOP sMsgType) (let [[_head hash code] (buf/read buffer-r (:RTMP_STOP_CLIENT MsgSpec))
+                                    dev (get @devices hash)]
+                                (if-not (nil? dev)
+                                  (do (swap! devices #(assoc % hash (assoc dev :last-msg stored)))
+                                      (log/debugf "RTMP_STOP %s" h-msg)
+                                      (bus/publish! app-bus (keyword (str/join "RTMP_STOP" (int32->hex-str hash)))
+                                                    (condp = code
+                                                      (:OK sErrCode) :ok
+                                                      ;; https://stackoverflow.com/questions/1242819/how-do-i-write-else-in-condp-in-clojure
+                                                      :err)))))
       (:HEARTBEAT sMsgType) (let [spec (:HEARTBEAT MsgSpec)
                              [_head hash] (buf/read buffer-r spec)
                              dev (get @devices hash)]

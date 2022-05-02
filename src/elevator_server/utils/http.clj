@@ -27,10 +27,7 @@
   "Default safe handler for any exception."
   [^Exception e _]
   {:status 500
-   :body   {:type      "exception"
-            :class     (.getName (.getClass e))
-            :message   (.getMessage e)
-            :exception (ex-data e)}})
+   :body   {:exception (Throwable->map e)}})
 
 (def opts
   {:exception pretty/exception
