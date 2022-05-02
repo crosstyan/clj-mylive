@@ -53,7 +53,7 @@
    (ds/opt :name)   string?                                 ; name
    (ds/opt :e-chan) string?                                 ; hex representation of emergency channel
    :last-msg        stored-msg-spec
-   (ds/opt :chan)   integer?})
+   (ds/opt :chan)   string?})
 
 (def device-spec
   (ds/spec {:name ::device

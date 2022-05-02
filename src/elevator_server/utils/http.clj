@@ -57,7 +57,7 @@
                             ;; https://cljdoc.org/d/metosin/reitit/0.5.15/doc/ring/content-negotiation
                             muuntaja/format-request-middleware
                             ;; coercing response bodys
-                            coercion/coerce-response-middleware
+                            ;coercion/coerce-response-middleware
                             ;; coercing request parameters
                             coercion/coerce-request-middleware
                             ;; hot reload

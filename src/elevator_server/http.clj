@@ -8,13 +8,11 @@
             [elevator-server.utils.core :refer [nil?-or]]
             [elevator-server.utils.http :refer [opts]]
             [elevator-server.utils.udp :as u-udp :refer [int32->hex-str send-back!
-                                                         rand-rtmp-stream-chan
                                                          create-rtmp-stream-req
-                                                         create-rtmp-stop-req]]
-            [monger.core :as mg]
+                                                         create-rtmp-stop-req
+                                                         device-spec]]
             [clojure.core.match :refer [match]]
             [monger.collection :as mc]
-            [clojure.pprint :as pp]
             [reitit.ring :as ring]
             [reitit.coercion.spec]
             [clojure.spec.alpha :as s]
@@ -23,12 +21,6 @@
             [reitit.swagger-ui :as swagger-ui]
             [reitit.coercion.spec :as rcs]
             [monger.query :as mq]
-            [reitit.ring.coercion :as coercion]
-            [reitit.dev.pretty :as pretty]
-            [spec-tools.core :as st]
-            [spec-tools.swagger.core :as swag]
-            [ring.middleware.reload :refer [wrap-reload]]
-            [monger.conversion :refer [from-db-object]]
             [clojure.string :as str]
             [tick.core :as t]))
 
@@ -170,7 +162,8 @@
                                           :else {:status 404 :body {:result "not found"}})))}}]
        ["/rtmp/devices"
         {:swagger {:tags ["RTMP"]}
-         :get     {:summary "get online devices"
+         :get     {:summary "get online devices. The response docs of swagger is wrong. It should be a list of device"
+                   :responses {200 {:body device-spec}}
                    ;; TODO https://clojuredocs.org/clojure.core/subvec
                    :handler (fn [_req]
                               (let [devs (vals @devices)
@@ -180,6 +173,7 @@
         {:swagger {:tags ["RTMP"]}
          :get     {:summary    "get online devices of id"
                    :parameters {:path (s/keys :req-un [:dev/id])}
+                   :responses {200 {:body device-spec}}
                    :handler    (fn [{{{:keys [id]} :path} :parameters}]
                                  (let [dev (get-dev-by-id @devices id)]
                                    (if (not (nil? dev))
@@ -189,6 +183,7 @@
         {:swagger {:tags ["RTMP"]}
          :get     {:summary    "start stream on certain device"
                    :parameters {:path (s/keys :req-un [:dev/id])}
+                   :responses {200 {:body {:chan string?}}}
                    :handler    (fn [{{{:keys [id]} :path} :parameters}]
                                  (let [dev (get-dev-by-id @devices id)]
                                    (if (not (nil? dev))
@@ -215,6 +210,7 @@
         {:swagger {:tags ["RTMP"]}
          :get     {:summary    "stop stream on certain device"
                    :parameters {:path (s/keys :req-un [:dev/id])}
+                   :responses {200 {:body {:result string?}}}
                    :handler    (fn [{{{:keys [id]} :path} :parameters}]
                                  (let [dev (get-dev-by-id @devices id)]
                                    (if-not (nil? dev)

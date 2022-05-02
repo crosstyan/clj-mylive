@@ -3,23 +3,13 @@
   ;(:refer-clojure :rename {udp-server server})
   (:require
     [manifold.stream :as ms]
-    [aleph.udp :as udp]
     [clojure.string :as str]
-    [byte-streams :as bs]
-    [clojure.core.match :refer [match]]
     [monger.collection :as mc]
     [elevator-server.global :refer [db-udp udp-server devices app-bus] :rename {db-udp db}]
     [elevator-server.utils.udp :refer :all]
-    [byte-streams :as bs]
-    [spec-tools.data-spec :as ds]
     [octet.core :as buf]
-    [clojure.core.match :refer [match]]
     [clojure.tools.logging :as log]
-    [manifold.bus :as bus])
-  (:import
-    (com.google.common.primitives Ints UnsignedInts Shorts)
-    (java.io ByteArrayOutputStream)
-    (java.nio ByteBuffer)))
+    [manifold.bus :as bus]))
 
 
 (defn send-rtmp-emerg-resp
