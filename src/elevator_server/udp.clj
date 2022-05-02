@@ -44,54 +44,53 @@
         buffer-r (byte-array->buf (:message conv))
         v-msg (vec (:message conv))
         h-msg (byte-array->str (:message conv))
-        stored (update conv :message byte-array->str)
-        INIT (:INIT sMsgType)
-        RTMP_EMERG (:RTMP_EMERG sMsgType)
-        RTMP_STREAM (:RTMP_STREAM sMsgType)
-        HEARTBEAT (:HEARTBEAT sMsgType)]
-    (match [(first v-msg)]
-           [INIT] (let [[_head id] (buf/read buffer-r (:INIT_CLIENT MsgSpec))
-                        buffer-w (buf/allocate (buf/size (:INIT_SERVER MsgSpec)))
-                        hash (rand-by-hash id)
-                        _ (buf/write! buffer-w [INIT hash] (:INIT_SERVER MsgSpec))
-                        e (byte-array [(:INIT sMsgType) (:ERR sErrCode)])
-                        e-chan (rand-rtmp-emerg-chan)]
-                    (log/debugf "INIT %s" h-msg)
-                    (if (not (nil? (mc/find-one db "device" {:id id})))
-                      (do (swap! devices #(revoke-hash % id))
-                          (swap! devices #(assoc % hash {:id id :hash hash :last-msg stored :e-chan (uint16->hex-str e-chan)}))
-                          (log/info "INIT" ":id" id)
-                          (log/debugf "INIT %s from Server" (byte-array->str (.array buffer-w)))
-                          (send-back! @udp-server recv buffer-w)
-                          (log/debug "INIT e-chan" (uint16->hex-str e-chan) e-chan)
-                          (send-rtmp-emerg-resp hash @udp-server e-chan)) ;; send-emerg-key-without requesting
-                      (send-back! @udp-server recv e)))
-           [RTMP_EMERG] (let [[_head hash] (buf/read buffer-r (:RTMP_EMERG_CLIENT MsgSpec))
-                              dev (get @devices hash)
-                              e-chan (rand-rtmp-emerg-chan)]
-                          (if (not (nil? dev))
-                            (do (swap! devices #(assoc % hash (assoc dev :e-chan (uint16->hex-str e-chan) :last-msg stored))) ;swap e-chan and last msg
-                                (log/debugf "RTMP_EMERG %s" h-msg)
-                                (send-rtmp-emerg-resp hash @udp-server e-chan))))
-           [RTMP_STREAM] (let [[_head hash chan code] (buf/read buffer-r (:RTMP_STREAM_CLIENT MsgSpec))
-                               chan-hex (uint16->hex-str chan)
-                               dev (get @devices hash)]
-                           (if (not (nil? dev))
-                             (do (swap! devices #(assoc % hash (assoc dev :last-msg stored)))
-                                 (log/debugf "RTMP_STREAM %s" h-msg)
-                                 (bus/publish! app-bus (keyword (str/join "RTMP_STREAM" (int32->hex-str hash)))
-                                               (cond
-                                                 (= code (:OK sErrCode)) (do (swap! devices #(assoc % hash (assoc dev :chan chan-hex)))
-                                                                             :ok)
-                                                 (= code (:BUSY sErrCode)) :busy
-                                                 :else :err)))))
-           [HEARTBEAT] (let [spec (:HEARTBEAT MsgSpec)
+        stored (update conv :message byte-array->str)]
+    (condp = (first v-msg)
+      (:INIT sMsgType) (let [[_head id] (buf/read buffer-r (:INIT_CLIENT MsgSpec))
+                             buffer-w (buf/allocate (buf/size (:INIT_SERVER MsgSpec)))
+                             hash (rand-by-hash id)
+                             _ (buf/write! buffer-w [(:INIT sMsgType) hash] (:INIT_SERVER MsgSpec))
+                             e (byte-array [(:INIT sMsgType) (:ERR sErrCode)])
+                             e-chan (rand-rtmp-emerg-chan)]
+                         (log/debugf "INIT %s" h-msg)
+                         (if (not (nil? (mc/find-one db "device" {:id id})))
+                           (do (swap! devices #(revoke-hash % id))
+                               (swap! devices #(assoc % hash {:id id :hash hash :last-msg stored :e-chan (uint16->hex-str e-chan)}))
+                               (log/info "INIT" ":id" id)
+                               (log/debugf "INIT %s from Server" (byte-array->str (.array buffer-w)))
+                               (send-back! @udp-server recv buffer-w)
+                               (log/debug "INIT e-chan" (uint16->hex-str e-chan) e-chan)
+                               (send-rtmp-emerg-resp hash @udp-server e-chan)) ;; send-emerg-key-without requesting
+                           (send-back! @udp-server recv e)))
+      (:RTMP_EMERG sMsgType) (let [[_head hash] (buf/read buffer-r (:RTMP_EMERG_CLIENT MsgSpec))
+                             dev (get @devices hash)
+                             e-chan (rand-rtmp-emerg-chan)]
+                         (if (not (nil? dev))
+                           (do (swap! devices #(assoc % hash (assoc dev :e-chan (uint16->hex-str e-chan) :last-msg stored))) ;swap e-chan and last msg
+                               (log/debugf "RTMP_EMERG %s" h-msg)
+                               (send-rtmp-emerg-resp hash @udp-server e-chan))))
+      (:RTMP_STREAM sMsgType) (let [[_head hash chan code] (buf/read buffer-r (:RTMP_STREAM_CLIENT MsgSpec))
+                             chan-hex (uint16->hex-str chan)
+                             dev (get @devices hash)]
+                         (if (not (nil? dev))
+                           (do (swap! devices #(assoc % hash (assoc dev :last-msg stored)))
+                               (log/debugf "RTMP_STREAM %s" h-msg)
+                               (bus/publish! app-bus (keyword (str/join "RTMP_STREAM" (int32->hex-str hash)))
+                                             (condp = code
+                                               (:OK sErrCode) (do (swap! devices #(assoc % hash (assoc dev :chan chan-hex)))
+                                                                  :ok)
+                                               (:BUSY sErrCode) :busy
+                                               (:BUSY_EMERG sErrCode) :busy
+                                               (:BUSY_STREAM sErrCode) :busy
+                                               ;; https://stackoverflow.com/questions/1242819/how-do-i-write-else-in-condp-in-clojure
+                                               :err)))))
+      (:HEARTBEAT sMsgType) (let [spec (:HEARTBEAT MsgSpec)
                              [_head hash] (buf/read buffer-r spec)
                              dev (get @devices hash)]
                          (log/infof "HEARTBEAT %s" h-msg)
                          (if (not (nil? dev))
                            (do (swap! devices #(assoc % hash (assoc dev :last-msg stored))))))
-           :else nil)))
+      nil)))
 
 (defn start []
   "start udp server"

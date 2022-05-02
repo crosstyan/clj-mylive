@@ -28,7 +28,8 @@
             [spec-tools.swagger.core :as swag]
             [ring.middleware.reload :refer [wrap-reload]]
             [monger.conversion :refer [from-db-object]]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [tick.core :as t]))
 
 
 ;; example from
@@ -47,7 +48,7 @@
   [req]
   (md/let-flow [conn (md/catch
                        (a-http/websocket-connection req)
-                       (fn [_] nil))]
+                       (constantly nil))]
                (if-not conn
                  ;; if it wasn't a valid websocket handshake, return an error
                  non-websocket-request
@@ -81,6 +82,19 @@
 
 (defn get-dev-by-id [m id]
   (first (filter #(= (:id %) id) (vals m))))
+
+(defn get-dev-by-chan
+  ;; chan can be emerg channel or stream channel
+  ;; if both found (should not happen) return nil
+  ;; found none, return nil
+  [m chan]
+  (let [e-chan-dev (first (filter #(= (:e-chan %) chan) (vals m)))
+        chan-dev (first (filter #(= (:chan %) chan) (vals m)))]
+    (match [e-chan-dev chan-dev]
+           [nil nil] [:err nil]
+           [nil dev] [:stream dev]
+           [dev nil] [:emerg dev]
+           :else [:err nil])))
 
 (defn device-post-handler [req db]
   (let [{{b :body} :parameters} req
@@ -134,13 +148,25 @@
                :no-doc  true
                :handler rtmp-ws-handler}}]
        ["/rtmp"
-        {:swagger {:tags ["RTMP"]}
+        {:swagger {:tags ["RTMP MyLive"]}
          :post    {:summary    "get realtime rtmp message from mylive"
-                   :parameters {:body {:name string? :cmd string?}}
+                   :parameters {:body {:chan string? :cmd string?}}
                    :handler    (fn [req]
                                  (let [{{b :body} :parameters} req]
                                    (do (ms/put! rtmp-events (json/write-str b))
                                        {:status 200})))}}]
+
+       ["/rtmp/chan/{chan}/filename"
+        {:swagger {:tags ["RTMP MyLive"]}
+         :get     {:summary    "get filename for a channel"
+                   :parameters {:path {:chan string?}}
+                   :handler    (fn [{{{:keys [chan]} :path} :parameters}]
+                                 (let [[status dev] (get-dev-by-chan @devices chan)
+                                       time (t/format "yyyy-MM-dd'T'HH:mm:ss" (t/zoned-date-time))]
+                                   (match [status]
+                                          [:emerg] {:status 200 :body {:filename (str/join "-" [(:id dev) "EMERG" time])}}
+                                          [:stream] {:status 200 :body {:filename (str/join "-" [(:id dev) "STREAM" time])}}
+                                          :else {:status 404 :body {:result "not found"}})))}}]
        ["/rtmp/devices"
         {:swagger {:tags ["RTMP"]}
          :get     {:summary "get online devices"
@@ -163,8 +189,7 @@
          :get     {:summary    "start stream on certain device"
                    :parameters {:path (s/keys :req-un [:dev/id])}
                    :handler    (fn [{{{:keys [id]} :path} :parameters}]
-                                 (let [dev (get-dev-by-id @devices id)
-                                       ]
+                                 (let [dev (get-dev-by-id @devices id)]
                                    (if (not (nil? dev))
                                      (let [hash (:hash dev)
                                            l-msg (:last-msg dev)
@@ -177,12 +202,12 @@
                                        (send-back! @udp-server l-msg (.array req))
                                        (let [val @(ms/try-take! eb :err 5000 :timeout)]
                                          (log/debug "From UDP to HTTP" (name val))
-                                         (match [val]
-                                                [:ok] {:statuss 200 :body {:chan chan-hex}}
-                                                [:err] {:status 500 :body {:result "error"}}
-                                                [:busy] {:status 409 :body {:result "busy"}}
-                                                [:timeout] {:status 504 :body {:result "timeout"}}
-                                                :else {:status 500 :body {:result "error"}})))
+                                         (condp = val
+                                           :ok {:statuss 200 :body {:chan chan-hex}}
+                                           :err {:status 500 :body {:result "error"}}
+                                           :busy {:status 409 :body {:result "busy"}}
+                                           :timeout {:status 504 :body {:result "timeout"}}
+                                           {:status 500 :body {:result "error"}})))
                                      {:status 404 :body {:result "not found"}})))}}]
        ] opts)
     (ring/routes

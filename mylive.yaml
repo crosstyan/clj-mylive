@@ -7,8 +7,8 @@ saveFlvFile: true
 # the path where flv stores , must be a existing folder like /home/flv . 
 saveFlVFilePath: /home/crosstyan/Code/MyLive/flv
 # the size of thread pool that write rtmp and flv packages 
-handlerThreadPoolSize: 8
+handlerThreadPoolSize: 6
 sendRtmpCmd: true
 rtmpCmdPubApi: "http://127.0.0.1:3001/rtmp"
-
-
+requestFileName: true
+requestFileNameApi: "http://127.0.0.1:3001/rtmp/chan/{chan}/filename"

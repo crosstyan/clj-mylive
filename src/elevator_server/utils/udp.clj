@@ -65,7 +65,9 @@
               :HEARTBEAT   0x64})
 
 (def ErrCode {:OK   0xff
-              :BUSY 0x01
+              :BUSY 0x10
+              :BUSY_EMERG 0x11
+              :BUSY_STREAM 0x12
               :ERR  0x00})
 
 ;; http://funcool.github.io/octet/latest/
@@ -105,7 +107,6 @@
 
 (defn byte-array->buf [arr]
   (. ByteBuffer wrap arr))
-
 
 (defn concat-bytes-array [xs & yss]
   (let [stream (ByteArrayOutputStream.)]
