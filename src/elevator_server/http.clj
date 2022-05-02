@@ -17,8 +17,9 @@
             [reitit.coercion.spec]
             [clojure.spec.alpha :as s]
             [clojure.tools.logging :as log]
-            [reitit.swagger :as swagger]
+            [spec-tools.swagger.core :as swagger]
             [reitit.swagger-ui :as swagger-ui]
+            [spec-tools.core :as st]
             [reitit.coercion.spec :as rcs]
             [monger.query :as mq]
             [clojure.string :as str]
@@ -112,7 +113,7 @@
         {:get {:no-doc  true
                :swagger {:info {:title       "API for device manipulation"
                                 :description "with reitit-ring"}}
-               :handler (swagger/create-swagger-handler)}}]
+               :handler (reitit.swagger/create-swagger-handler)}}]
 
        ["/devices"
         {:swagger {:tags ["devices"]}
@@ -129,6 +130,7 @@
        ["/devices/{id}"
         {:swagger {:tags ["devices"]}
          :get     {:summary    "get certain device"
+                   :coercion   rcs/coercion
                    :parameters {:path (s/keys :req-un [:dev/id])}
                    :responses  {200 {:body :s/device}}
                    :handler    (fn [req]
@@ -143,6 +145,7 @@
        ["/rtmp"
         {:swagger {:tags ["RTMP MyLive"]}
          :post    {:summary    "get realtime rtmp message from mylive"
+                   :coercion   rcs/coercion
                    :parameters {:body {:chan string? :cmd string?}}
                    :handler    (fn [req]
                                  (let [{{b :body} :parameters} req]
@@ -152,6 +155,7 @@
        ["/rtmp/chan/{chan}/filename"
         {:swagger {:tags ["RTMP MyLive"]}
          :get     {:summary    "get filename for a channel"
+                   :coercion   rcs/coercion
                    :parameters {:path {:chan string?}}
                    :handler    (fn [{{{:keys [chan]} :path} :parameters}]
                                  (let [[status dev] (get-dev-by-chan @devices chan)
@@ -162,8 +166,8 @@
                                           :else {:status 404 :body {:result "not found"}})))}}]
        ["/rtmp/devices"
         {:swagger {:tags ["RTMP"]}
-         :get     {:summary "get online devices. The response docs of swagger is wrong. It should be a list of device"
-                   :responses {200 {:body device-spec}}
+         :get     {:swagger {:responses {200 {:schema {:type "array" :items (swagger/transform device-spec)}}}}
+                   :summary "get online devices. "
                    ;; TODO https://clojuredocs.org/clojure.core/subvec
                    :handler (fn [_req]
                               (let [devs (vals @devices)
@@ -172,8 +176,9 @@
        ["/rtmp/devices/{id}"
         {:swagger {:tags ["RTMP"]}
          :get     {:summary    "get online devices of id"
+                   :coercion   rcs/coercion
                    :parameters {:path (s/keys :req-un [:dev/id])}
-                   :responses {200 {:body device-spec}}
+                   :responses  {200 {:body device-spec}}
                    :handler    (fn [{{{:keys [id]} :path} :parameters}]
                                  (let [dev (get-dev-by-id @devices id)]
                                    (if (not (nil? dev))
@@ -182,8 +187,9 @@
        ["/rtmp/devices/{id}/start"
         {:swagger {:tags ["RTMP"]}
          :get     {:summary    "start stream on certain device"
+                   :coercion   rcs/coercion
                    :parameters {:path (s/keys :req-un [:dev/id])}
-                   :responses {200 {:body {:chan string?}}}
+                   :responses  {200 {:body {:chan string?}}}
                    :handler    (fn [{{{:keys [id]} :path} :parameters}]
                                  (let [dev (get-dev-by-id @devices id)]
                                    (if (not (nil? dev))
@@ -209,8 +215,9 @@
        ["/rtmp/devices/{id}/stop"
         {:swagger {:tags ["RTMP"]}
          :get     {:summary    "stop stream on certain device"
+                   :coercion   rcs/coercion
                    :parameters {:path (s/keys :req-un [:dev/id])}
-                   :responses {200 {:body {:result string?}}}
+                   :responses  {200 {:body {:result string?}}}
                    :handler    (fn [{{{:keys [id]} :path} :parameters}]
                                  (let [dev (get-dev-by-id @devices id)]
                                    (if-not (nil? dev)

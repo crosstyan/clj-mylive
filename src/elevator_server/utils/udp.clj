@@ -259,7 +259,7 @@
 (defn create-rtmp-emerg-resp
   "create a RTMP_EMERG msg
    hash is int32
-   return [byte-array chan: int16]"
+   return [ByteBuffer chan: int16]"
   ([hash chan]
    (let [spec (:RTMP_EMERG_SERVER MsgSpec)
          head (:RTMP_EMERG sMsgType)

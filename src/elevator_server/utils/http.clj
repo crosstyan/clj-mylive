@@ -31,8 +31,7 @@
 
 (def opts
   {:exception pretty/exception
-   :data      {:coercion   reitit.coercion.spec/coercion
-               :muuntaja   m/instance
+   :data      {:muuntaja   m/instance
                :middleware [;; swagger feature
                             swagger/swagger-feature
                             ;; query-params & form-params
@@ -42,9 +41,6 @@
                             ;; encoding response body
                             muuntaja/format-response-middleware
                             ;; exception handling
-                            ;(exception/create-exception-middleware
-                            ;  {::exception/default (partial exception/wrap-log-to-console exception/default-handler)})
-
                             (exception/create-exception-middleware
                               (merge
                                 exception/default-handlers
@@ -56,12 +52,9 @@
                             ;; decoding request body
                             ;; https://cljdoc.org/d/metosin/reitit/0.5.15/doc/ring/content-negotiation
                             muuntaja/format-request-middleware
-                            ;; coercing response bodys
-                            ;coercion/coerce-response-middleware
+                            ;; coercing response body
+                            coercion/coerce-response-middleware
                             ;; coercing request parameters
                             coercion/coerce-request-middleware
-                            ;; hot reload
-                            ;; https://stackoverflow.com/questions/59379314/how-to-make-a-ring-server-reload-on-file-change
-                            wrap-reload
                             ;; multipart
                             multipart/multipart-middleware]}})
