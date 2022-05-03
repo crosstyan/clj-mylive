@@ -206,7 +206,7 @@
                                            l-msg (:last-msg dev)
                                            [req chan] (create-rtmp-stream-req hash)
                                            chan-hex (u-udp/uint16->hex-str chan)
-                                           topic (keyword (keyword (str/join "RTMP_STREAM" (int32->hex-str hash))))
+                                           topic (keyword (str/join "RTMP_STREAM" (int32->hex-str hash)))
                                            eb (bus/subscribe app-bus topic)]
                                        ;; TODO: use multimethod to support both byte-array and ByteBuffer
                                        (log/debugf "RTMP_STREAM %s from Server" (u-udp/byte-array->str (.array req)))
@@ -235,7 +235,7 @@
                                      (let [hash (:hash dev)
                                            l-msg (:last-msg dev)
                                            req (create-rtmp-stop-req hash)
-                                           topic (keyword (keyword (str/join "RTMP_STOP" (int32->hex-str hash))))
+                                           topic (keyword (str/join "RTMP_STOP" (int32->hex-str hash)))
                                            eb (bus/subscribe app-bus topic)]
                                        ;; TODO: use multimethod to support both byte-array and ByteBuffer
                                        (log/debugf "RTMP_STOP %s from Server" (u-udp/byte-array->str (.array req)))
