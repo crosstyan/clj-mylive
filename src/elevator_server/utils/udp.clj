@@ -51,13 +51,24 @@
   {:id              integer?
    :hash            integer?
    (ds/opt :name)   string?                                 ; name
-   (ds/opt :e-chan) string?                                 ; hex representation of emergency channel
    :last-msg        stored-msg-spec
+   (ds/opt :e-chan) string?                                 ; hex representation of emergency channel
    (ds/opt :chan)   string?})
 
 (def device-spec
   (ds/spec {:name ::device
             :spec device}))
+
+(def device-spec-example
+  {:id 123,
+   :hash 2119203616,
+   :last-msg
+   {:host "127.0.0.1",
+    :port 34493,
+    :message "767e507b20ff",
+    :time "2022-05-03T11:20:04.930204239+08:00"},
+   :e-chan "ce22",
+   :chan "0fda"})
 
 (def MsgType {:INIT        0x70
               :RTMP_EMERG  0x77

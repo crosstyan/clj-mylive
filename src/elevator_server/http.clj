@@ -10,7 +10,8 @@
             [elevator-server.utils.udp :as u-udp :refer [int32->hex-str send-back!
                                                          create-rtmp-stream-req
                                                          create-rtmp-stop-req
-                                                         device-spec]]
+                                                         device-spec
+                                                         device-spec-example]]
             [clojure.core.match :refer [match]]
             [monger.collection :as mc]
             [reitit.ring :as ring]
@@ -105,6 +106,11 @@
 ;; https://github.com/metosin/reitit/blob/master/doc/ring/coercion.md
 ;; https://github.com/ring-clojure/ring/wiki/Concepts
 
+(def spec-404 {404 {:body {:result string?}}})
+
+(defn merge-404 [& rest]
+  (apply #(merge spec-404 %) rest))
+
 (def app
   "db is mongo db"
   (ring/ring-handler
@@ -125,14 +131,14 @@
          :post    {:summary    "post a device"
                    :coercion   rcs/coercion
                    :parameters {:body :s/device}
-                   :responses  {200 {:body {:result string?}}}
+                   :responses  (merge-404 {200 {:body {:result string?}}})
                    :handler    #(device-post-handler % db)}}]
        ["/devices/{id}"
         {:swagger {:tags ["devices"]}
          :get     {:summary    "get certain device"
                    :coercion   rcs/coercion
                    :parameters {:path (s/keys :req-un [:dev/id])}
-                   :responses  {200 {:body :s/device}}
+                   :responses  (merge-404 {200 {:body :s/device}})
                    :handler    (fn [req]
                                  (let [{{{:keys [id]} :path} :parameters} req
                                        doc (dissoc (mc/find-one-as-map db "device" {:id id}) :_id)]
@@ -157,6 +163,7 @@
          :get     {:summary    "get filename for a channel"
                    :coercion   rcs/coercion
                    :parameters {:path {:chan string?}}
+                   :responses (merge-404  {200 {:body {:filename string?}}})
                    :handler    (fn [{{{:keys [chan]} :path} :parameters}]
                                  (let [[status dev] (get-dev-by-chan @devices chan)
                                        time (t/format "yyyy-MM-dd'T'HH:mm:ss" (t/zoned-date-time))]
@@ -166,7 +173,7 @@
                                           :else {:status 404 :body {:result "not found"}})))}}]
        ["/rtmp/devices"
         {:swagger {:tags ["RTMP"]}
-         :get     {:swagger {:responses {200 {:schema {:type "array" :items (swagger/transform device-spec)}}}}
+         :get     {:swagger {:responses {200 {:schema {:type "array" :items (merge (swagger/transform device-spec) {:example device-spec-example})}}}}
                    :summary "get online devices. "
                    ;; TODO https://clojuredocs.org/clojure.core/subvec
                    :handler (fn [_req]
@@ -175,10 +182,11 @@
                                 {:status 200 :body res}))}}]
        ["/rtmp/devices/{id}"
         {:swagger {:tags ["RTMP"]}
-         :get     {:summary    "get online devices of id"
+         :get     {:swagger {:responses {200 {:schema {:example device-spec-example}}}}
+                   :summary    "get online devices of id"
                    :coercion   rcs/coercion
                    :parameters {:path (s/keys :req-un [:dev/id])}
-                   :responses  {200 {:body device-spec}}
+                   :responses  (merge-404 {200 {:body device-spec}})
                    :handler    (fn [{{{:keys [id]} :path} :parameters}]
                                  (let [dev (get-dev-by-id @devices id)]
                                    (if (not (nil? dev))
@@ -186,10 +194,11 @@
                                      {:status 404 :body {:result "not found"}})))}}]
        ["/rtmp/devices/{id}/start"
         {:swagger {:tags ["RTMP"]}
-         :get     {:summary    "start stream on certain device"
+         :get     {:swagger {:responses {200 {:schema {:example {:chan "0fda"}}}}}
+                   :summary    "start stream on certain device"
                    :coercion   rcs/coercion
                    :parameters {:path (s/keys :req-un [:dev/id])}
-                   :responses  {200 {:body {:chan string?}}}
+                   :responses  (merge-404 {200 {:body {:chan string?}}})
                    :handler    (fn [{{{:keys [id]} :path} :parameters}]
                                  (let [dev (get-dev-by-id @devices id)]
                                    (if (not (nil? dev))
@@ -214,10 +223,12 @@
 
        ["/rtmp/devices/{id}/stop"
         {:swagger {:tags ["RTMP"]}
-         :get     {:summary    "stop stream on certain device"
+         :get     {:swagger {:responses {200 {:schema {:example {:result "ok"}}}
+                                         404 {:schema {:example {:result "not found"}}}}}
+                   :summary    "stop stream on certain device"
                    :coercion   rcs/coercion
                    :parameters {:path (s/keys :req-un [:dev/id])}
-                   :responses  {200 {:body {:result string?}}}
+                   :responses  (merge-404 {200 {:body {:result string?}}})
                    :handler    (fn [{{{:keys [id]} :path} :parameters}]
                                  (let [dev (get-dev-by-id @devices id)]
                                    (if-not (nil? dev)
