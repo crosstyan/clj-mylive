@@ -33,24 +33,6 @@
 ;(def rtmp-events (ms/buffered-stream 20))
 (def rtmp-events (ms/stream 10))
 
-(def non-websocket-request
-  {:status  400
-   :headers {"content-type" "application/text"}
-   :body    "Expected a websocket request."})
-
-;; see https://github.com/clj-commons/aleph/blob/master/examples/src/aleph/examples/websocket.clj
-(defn rtmp-ws-handler
-  [req]
-  (md/let-flow [conn (md/catch
-                       (a-http/websocket-connection req)
-                       (constantly nil))]
-               (if-not conn
-                 ;; if it wasn't a valid websocket handshake, return an error
-                 non-websocket-request
-                 (md/let-flow [rtmp rtmp-events]
-                              ;; take all messages from the rtmp, and feed them to the client
-                              (ms/connect rtmp conn)
-                              nil))))
 
 (defn two-bytes? [x] (and (< x 65535) (< 0 x)))
 (s/def :dev/name string?)
@@ -81,7 +63,7 @@
 (defn get-dev-by-chan
   ;; chan can be emerg channel or stream channel
   ;; if both found (should not happen) return nil
-  ;; found none, return nil
+  ;; found none, return [:err nil]
   [m chan]
   (let [e-chan-dev (first (filter #(= (:e-chan %) chan) (vals m)))
         chan-dev (first (filter #(= (:chan %) chan) (vals m)))]
@@ -90,6 +72,40 @@
            [nil dev] [:stream dev]
            [dev nil] [:emerg dev]
            :else [:err nil])))
+
+(defn rtmp-events->with-meta
+  "add {:id id :type 'emerg'/'stream'} to each event"
+  [m]
+  (let [[status dev] (get-dev-by-chan @devices (:chan m))
+        wrap (fn [e] {:type "rtmp-event" :content e})]
+    (condp = status
+      :err (wrap m)
+      (wrap (assoc m :id (:id dev) :type (name status))))))
+
+(def non-websocket-request
+  {:status  400
+   :headers {"content-type" "application/text"}
+   :body    "Expected a websocket request."})
+
+
+;; see https://github.com/clj-commons/aleph/blob/master/examples/src/aleph/examples/websocket.clj
+(defn rtmp-ws-handler
+  [req]
+  (md/let-flow [conn (md/catch
+                       (a-http/websocket-connection req)
+                       (constantly nil))]
+               (if-not conn
+                 ;; if it wasn't a valid websocket handshake, return an error
+                 non-websocket-request
+                 (md/let-flow [rtmp (ms/map rtmp-events->with-meta rtmp-events)
+                               rtmp-str (ms/map json/write-str rtmp)
+                               online-event (bus/subscribe app-bus :dev-online)
+                               online (ms/map #((constantly {:type "online" :content %})) online-event)
+                               online-str (ms/map json/write-str online)]
+                              ;; take all messages from the rtmp, and feed them to the client
+                              (ms/connect rtmp-str conn)
+                              (ms/connect online-str conn)
+                              nil))))
 
 (defn device-post-handler [req db]
   (let [{{b :body} :parameters} req
@@ -155,7 +171,7 @@
                    :parameters {:body {:chan string? :cmd string?}}
                    :handler    (fn [req]
                                  (let [{{b :body} :parameters} req]
-                                   (do (ms/put! rtmp-events (json/write-str b))
+                                   (do (ms/put! rtmp-events b)
                                        {:status 200})))}}]
 
        ["/rtmp/chan/{chan}/filename"
@@ -214,7 +230,7 @@
                                        (let [val @(ms/try-take! eb :err 5000 :timeout)]
                                          (log/debug "From UDP to HTTP" (name val))
                                          (condp = val
-                                           :ok {:statuss 200 :body {:chan chan-hex}}
+                                           :ok {:status 200 :body {:chan chan-hex}}
                                            :err {:status 500 :body {:result "error"}}
                                            :busy {:status 409 :body {:result "busy"}}
                                            :timeout {:status 504 :body {:result "timeout"}}
@@ -243,7 +259,7 @@
                                        (let [val @(ms/try-take! eb :err 5000 :timeout)]
                                          (log/debug "From UDP to HTTP" (name val))
                                          (condp = val
-                                           :ok {:statuss 200 :body {:result "ok"}}
+                                           :ok {:status 200 :body {:result "ok"}}
                                            :timeout {:status 504 :body {:result "timeout"}}
                                            {:status 500 :body {:result "error"}})))
                                      {:status 404 :body {:result "not found"}})))}}]
@@ -261,3 +277,4 @@
   ;; https://stackoverflow.com/questions/39550513/when-to-use-a-var-instead-of-a-function
   (a-http/start-server #'app {:port port})
   (log/info "API HTTP server runing in port" port))
+

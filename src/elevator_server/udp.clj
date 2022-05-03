@@ -41,16 +41,18 @@
                              hash (rand-by-hash id)
                              _ (buf/write! buffer-w [(:INIT sMsgType) hash] (:INIT_SERVER MsgSpec))
                              e (byte-array [(:INIT sMsgType) (:ERR sErrCode)])
-                             e-chan (rand-rtmp-emerg-chan)]
+                             e-chan (rand-rtmp-emerg-chan)
+                             dev {:id id :hash hash :last-msg stored :e-chan (uint16->hex-str e-chan)}]
                          (log/debugf "INIT %s" h-msg)
                          (if (not (nil? (mc/find-one db "device" {:id id})))
                            (do (swap! devices #(revoke-hash % id))
-                               (swap! devices #(assoc % hash {:id id :hash hash :last-msg stored :e-chan (uint16->hex-str e-chan)}))
                                (log/info "INIT" ":id" id)
                                (log/debugf "INIT %s from Server" (byte-array->str (.array buffer-w)))
                                (send-back! @udp-server recv buffer-w)
                                (log/debug "INIT e-chan" (uint16->hex-str e-chan) e-chan)
-                               (send-rtmp-emerg-resp hash @udp-server e-chan)) ;; send-emerg-key-without requesting
+                               (send-rtmp-emerg-resp hash @udp-server e-chan)
+                               (swap! devices #(assoc % hash dev))
+                               (bus/publish! app-bus :dev-online dev)) ;; send-emerg-key-without requesting
                            (send-back! @udp-server recv e)))
       (:RTMP_EMERG sMsgType) (let [[_head hash] (buf/read buffer-r (:RTMP_EMERG_CLIENT MsgSpec))
                              dev (get @devices hash)
