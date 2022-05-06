@@ -17,11 +17,12 @@
    (let [[buffer-w _chan] (create-rtmp-emerg-resp hash e-chan)
          dev (get @devices hash)
          l-msg (:last-msg dev)]
-     (if (not (nil? dev))
+     (if-not (nil? dev)
        (do
          (log/debugf "RTMP_EMERG %s from Server" (byte-array->str (.array buffer-w)))
          (send-back! server l-msg buffer-w)
-         nil))))
+         nil)
+       (log/info "RTMP_EMERG: device not found"))))
   ([hash server] (send-rtmp-emerg-resp hash server (rand-rtmp-emerg-chan))))
 
 (defn app-handler
@@ -42,16 +43,17 @@
                              _ (buf/write! buffer-w [(:INIT sMsgType) hash] (:INIT_SERVER MsgSpec))
                              e (byte-array [(:INIT sMsgType) (:ERR sErrCode)])
                              e-chan (rand-rtmp-emerg-chan)
-                             dev {:id id :hash hash :last-msg stored :e-chan (uint16->hex-str e-chan)}]
+                             dev-db (mc/find-one-as-map db "device" {:id id})
+                             dev {:name (:name dev-db) :id id :hash hash :last-msg stored :e-chan (uint16->hex-str e-chan)}]
                          (log/debugf "INIT %s" h-msg)
-                         (if (not (nil? (mc/find-one db "device" {:id id})))
+                         (if-not (nil? dev-db)
                            (do (swap! devices #(revoke-hash % id))
                                (log/info "INIT" ":id" id)
                                (log/debugf "INIT %s from Server" (byte-array->str (.array buffer-w)))
                                (send-back! @udp-server recv buffer-w)
                                (log/debug "INIT e-chan" (uint16->hex-str e-chan) e-chan)
-                               (send-rtmp-emerg-resp hash @udp-server e-chan)
                                (swap! devices #(assoc % hash dev))
+                               (send-rtmp-emerg-resp hash @udp-server e-chan)
                                (bus/publish! app-bus :dev-online dev)) ;; send-emerg-key-without requesting
                            (send-back! @udp-server recv e)))
       (:RTMP_EMERG sMsgType) (let [[_head hash] (buf/read buffer-r (:RTMP_EMERG_CLIENT MsgSpec))
@@ -93,7 +95,7 @@
                          (log/infof "HEARTBEAT %s" h-msg)
                          (if (not (nil? dev))
                            (do (swap! devices #(assoc % hash (assoc dev :last-msg stored))))))
-      nil)))
+      (log/info h-msg))))
 
 (defn start []
   "start udp server"

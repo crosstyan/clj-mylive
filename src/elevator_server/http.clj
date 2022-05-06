@@ -21,11 +21,15 @@
             [spec-tools.swagger.core :as swagger]
             [reitit.swagger-ui :as swagger-ui]
             [spec-tools.core :as st]
+            [simple-cors.aleph.middleware :as cors]
             [reitit.coercion.spec :as rcs]
             [monger.query :as mq]
             [clojure.string :as str]
             [tick.core :as t]))
 
+(def cors-config {:cors-config {:allowed-request-methods [:post :get :put :delete]
+                                :allowed-request-headers ["Authorization" "Content-Type"]
+                                :origins                 "*"}})
 
 ;; example from
 ;; https://github.com/metosin/reitit/blob/master/examples/ring-swagger/src/example/server.clj
@@ -77,7 +81,7 @@
   "add {:id id :type 'emerg'/'stream'} to each event"
   [m]
   (let [[status dev] (get-dev-by-chan @devices (:chan m))
-        wrap (fn [e] {:type "rtmp-event" :content e})]
+        wrap (fn [e] {:type "rtmp" :content e})]
     (condp = status
       :err (wrap m)
       (wrap (assoc m :id (:id dev) :type (name status))))))
@@ -179,7 +183,7 @@
          :get     {:summary    "get filename for a channel"
                    :coercion   rcs/coercion
                    :parameters {:path {:chan string?}}
-                   :responses (merge-404  {200 {:body {:filename string?}}})
+                   :responses  (merge-404 {200 {:body {:filename string?}}})
                    :handler    (fn [{{{:keys [chan]} :path} :parameters}]
                                  (let [[status dev] (get-dev-by-chan @devices chan)
                                        time (t/format "yyyy-MM-dd'T'HH:mm:ss" (t/zoned-date-time))]
@@ -198,7 +202,7 @@
                                 {:status 200 :body res}))}}]
        ["/rtmp/devices/{id}"
         {:swagger {:tags ["RTMP"]}
-         :get     {:swagger {:responses {200 {:schema {:example device-spec-example}}}}
+         :get     {:swagger    {:responses {200 {:schema {:example device-spec-example}}}}
                    :summary    "get online devices of id"
                    :coercion   rcs/coercion
                    :parameters {:path (s/keys :req-un [:dev/id])}
@@ -210,7 +214,7 @@
                                      {:status 404 :body {:result "not found"}})))}}]
        ["/rtmp/devices/{id}/start"
         {:swagger {:tags ["RTMP"]}
-         :get     {:swagger {:responses {200 {:schema {:example {:chan "0fda"}}}}}
+         :get     {:swagger    {:responses {200 {:schema {:example {:chan "0fda"}}}}}
                    :summary    "start stream on certain device"
                    :coercion   rcs/coercion
                    :parameters {:path (s/keys :req-un [:dev/id])}
@@ -227,7 +231,7 @@
                                        ;; TODO: use multimethod to support both byte-array and ByteBuffer
                                        (log/debugf "RTMP_STREAM %s from Server" (u-udp/byte-array->str (.array req)))
                                        (send-back! @udp-server l-msg (.array req))
-                                       (let [val @(ms/try-take! eb :err 5000 :timeout)]
+                                       (let [val @(ms/try-take! eb :err 20000 :timeout)]
                                          (log/debug "From UDP to HTTP" (name val))
                                          (condp = val
                                            :ok {:status 200 :body {:chan chan-hex}}
@@ -239,8 +243,8 @@
 
        ["/rtmp/devices/{id}/stop"
         {:swagger {:tags ["RTMP"]}
-         :get     {:swagger {:responses {200 {:schema {:example {:result "ok"}}}
-                                         404 {:schema {:example {:result "not found"}}}}}
+         :get     {:swagger    {:responses {200 {:schema {:example {:result "ok"}}}
+                                            404 {:schema {:example {:result "not found"}}}}}
                    :summary    "stop stream on certain device"
                    :coercion   rcs/coercion
                    :parameters {:path (s/keys :req-un [:dev/id])}
@@ -256,7 +260,7 @@
                                        ;; TODO: use multimethod to support both byte-array and ByteBuffer
                                        (log/debugf "RTMP_STOP %s from Server" (u-udp/byte-array->str (.array req)))
                                        (send-back! @udp-server l-msg (.array req))
-                                       (let [val @(ms/try-take! eb :err 5000 :timeout)]
+                                       (let [val @(ms/try-take! eb :err 20000 :timeout)]
                                          (log/debug "From UDP to HTTP" (name val))
                                          (condp = val
                                            :ok {:status 200 :body {:result "ok"}}
@@ -271,10 +275,12 @@
                   :operationsSorter "alpha"}})
       (ring/create-default-handler))))
 
+(def app-cors (cors/wrap #'app cors-config))
+
 (defn start [port]
   ;; used for repl
   ;; https://stackoverflow.com/questions/17792084/what-is-i-see-in-ring-app
   ;; https://stackoverflow.com/questions/39550513/when-to-use-a-var-instead-of-a-function
-  (a-http/start-server #'app {:port port})
+  (a-http/start-server app-cors {:port port})
   (log/info "API HTTP server runing in port" port))
 
