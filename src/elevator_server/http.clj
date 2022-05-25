@@ -93,7 +93,9 @@
 
 
 ;; see https://github.com/clj-commons/aleph/blob/master/examples/src/aleph/examples/websocket.clj
+;;
 (defn rtmp-ws-handler
+  "spec {:type string :content string | map}"
   [req]
   (md/let-flow [conn (md/catch
                        (a-http/websocket-connection req)
@@ -101,14 +103,41 @@
                (if-not conn
                  ;; if it wasn't a valid websocket handshake, return an error
                  non-websocket-request
+                 ;; TODO: use threading
                  (md/let-flow [rtmp (ms/map rtmp-events->with-meta rtmp-events)
                                rtmp-str (ms/map json/write-str rtmp)
-                               online-event (bus/subscribe app-bus :dev-online)
-                               online (ms/map #((constantly {:type "online" :content %})) online-event)
-                               online-str (ms/map json/write-str online)]
+                               online (ms/map #((constantly {:type "online" :content %})) (bus/subscribe app-bus :dev-online))
+                               online-str (ms/map json/write-str online)
+                               pressure (ms/map #((constantly {:type "pressure" :content %})) (bus/subscribe app-bus :pressure))
+                               pressure-str (ms/map json/write-str pressure)
+                               acc (ms/map #((constantly {:type "acceleration" :content %})) (bus/subscribe app-bus :acceleration))
+                               acc-str (ms/map json/write-str acc)]
                               ;; take all messages from the rtmp, and feed them to the client
                               (ms/connect rtmp-str conn)
                               (ms/connect online-str conn)
+                              (ms/connect acc-str conn)
+                              (ms/connect pressure-str conn)
+                              nil))))
+
+
+(defn device-ws-handler
+  "spec {:type string :content string | map}"
+  [req]
+  (md/let-flow [conn (md/catch
+                       (a-http/websocket-connection req)
+                       (constantly nil))]
+               (if-not conn
+                 non-websocket-request
+                 (md/let-flow [{{id :id} :path-params} req
+                               p-kw (keyword (str/join "PRESSURE" id))
+                               acc-kw (keyword (str/join "ACC" id))
+                               pressure (ms/map #((constantly {:type "pressure" :content %})) (bus/subscribe app-bus p-kw))
+                               pressure-str (ms/map json/write-str pressure)
+                               acc (ms/map #((constantly {:type "acceleration" :content %})) (bus/subscribe app-bus acc-kw))
+                               acc-str (ms/map json/write-str acc)]
+                              ;; take all messages from the rtmp, and feed them to the client
+                              (ms/connect acc-str conn)
+                              (ms/connect pressure-str conn)
                               nil))))
 
 (defn device-post-handler [req db]
@@ -168,6 +197,11 @@
         {:get {:summary "websocket"
                :no-doc  true
                :handler rtmp-ws-handler}}]
+       ["/ws/device/{id}"
+        {:get {:summary    "websocket device events for acc and pressure"
+               :no-doc     true
+               :parameters {:path {:id string?}}            ;; id should be number
+               :handler    device-ws-handler}}]
        ["/rtmp"
         {:swagger {:tags ["RTMP MyLive"]}
          :post    {:summary    "get realtime rtmp message from mylive"

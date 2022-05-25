@@ -60,27 +60,29 @@
             :spec device}))
 
 (def device-spec-example
-  {:id 123,
-   :hash 2119203616,
+  {:id     123,
+   :hash   2119203616,
    :last-msg
-   {:host "127.0.0.1",
-    :port 34493,
+   {:host    "127.0.0.1",
+    :port    34493,
     :message "767e507b20ff",
-    :time "2022-05-03T11:20:04.930204239+08:00"},
+    :time    "2022-05-03T11:20:04.930204239+08:00"},
    :e-chan "ce22",
-   :chan "0fda"})
+   :chan   "0fda"})
 
-(def MsgType {:INIT        0x70
-              :RTMP_EMERG  0x77
-              :RTMP_STREAM 0x75
-              :RTMP_STOP   0x76
-              :HEARTBEAT   0x64})
+(def uMsgType {:INIT        0x70
+               :RTMP_EMERG  0x77
+               :RTMP_STREAM 0x75
+               :RTMP_STOP   0x76
+               :HEARTBEAT   0x64
+               :PRESSURE    0x90
+               :ACC         0x88})
 
-(def ErrCode {:OK   0xff
-              :BUSY 0x10
-              :BUSY_EMERG 0x11
-              :BUSY_STREAM 0x12
-              :ERR  0x00})
+(def uErrCode {:OK          0xff
+               :BUSY        0x10
+               :BUSY_EMERG  0x11
+               :BUSY_STREAM 0x12
+               :ERR         0x00})
 
 ;; http://funcool.github.io/octet/latest/
 (def MsgSpec {:INIT_CLIENT        (buf/spec buf/byte buf/int16) ;; type id
@@ -93,19 +95,22 @@
               :RTMP_STREAM_SERVER (buf/spec buf/byte buf/int32 buf/uint16) ;; type hash chn (note chn is unsigned)
               :RTMP_STREAM_CLIENT (buf/spec buf/byte buf/int32 buf/uint16 buf/byte) ;; type hash err
 
-              :RTMP_STOP_SERVER (buf/spec buf/byte buf/int32) ;; type hash
-              :RTMP_STOP_CLIENT (buf/spec buf/byte buf/int32 buf/byte) ;; type hash err
+              :RTMP_STOP_SERVER   (buf/spec buf/byte buf/int32) ;; type hash
+              :RTMP_STOP_CLIENT   (buf/spec buf/byte buf/int32 buf/byte) ;; type hash err
 
               :HEARTBEAT          (buf/spec buf/byte buf/int32) ;; type hash
+
+              :PRESSURE_CLIENT    (buf/spec buf/byte buf/int32 buf/float) ;; type hash val
+              :ACC_CLIENT         (buf/spec buf/byte buf/int32 buf/float buf/float buf/float) ;; type hash x y z
               })
 
 (defn map-value [f map]
   (reduce (fn [m k] (assoc m k (f (k map))))
           {} (keys map)))
 
-(def sMsgType (map-value unchecked-byte MsgType))
+(def MsgType (map-value unchecked-byte uMsgType))
 
-(def sErrCode (map-value unchecked-byte ErrCode))
+(def ErrCode (map-value unchecked-byte uErrCode))
 
 (defn int16->to-bytes-array
   "Convert a short (int16) to a byte array.
@@ -249,7 +254,7 @@
 (defn create-rtmp-stop-req
   [hash]
   (let [spec (:RTMP_STOP_SERVER MsgSpec)
-        head (:RTMP_STOP sMsgType)
+        head (:RTMP_STOP MsgType)
         buffer (buf/allocate (buf/size spec))]
     (do (buf/write! buffer [head hash] spec)
         buffer)))
@@ -260,7 +265,7 @@
    return [ByteBuffer chan: int16]"
   ([hash chan]
    (let [spec (:RTMP_STREAM_SERVER MsgSpec)
-         head (:RTMP_STREAM sMsgType)
+         head (:RTMP_STREAM MsgType)
          buffer (buf/allocate (buf/size spec))]
      (do
        (buf/write! buffer [head hash chan] spec)
@@ -273,7 +278,7 @@
    return [ByteBuffer chan: int16]"
   ([hash chan]
    (let [spec (:RTMP_EMERG_SERVER MsgSpec)
-         head (:RTMP_EMERG sMsgType)
+         head (:RTMP_EMERG MsgType)
          buffer (buf/allocate (buf/size spec))]
      (do
        (buf/write! buffer [head hash chan] spec)
