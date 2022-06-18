@@ -20,12 +20,14 @@
             [clojure.tools.logging :as log]
             [spec-tools.swagger.core :as swagger]
             [reitit.swagger-ui :as swagger-ui]
+            [elevator-server.mylive :refer [get-config get-video-path]]
             [spec-tools.core :as st]
             [simple-cors.aleph.middleware :as cors]
             [reitit.coercion.spec :as rcs]
             [monger.query :as mq]
             [clojure.string :as str]
-            [tick.core :as t]))
+            [tick.core :as t]
+            [clojure.java.io :as io]))
 
 (def cors-config {:cors-config {:allowed-request-methods [:post :get :put :delete]
                                 :allowed-request-headers ["Authorization" "Content-Type"]
@@ -301,12 +303,22 @@
                                            :timeout {:status 504 :body {:result "timeout"}}
                                            {:status 500 :body {:result "error"}})))
                                      {:status 404 :body {:result "not found"}})))}}]
+       ["/videos"
+        {:swagger {:tags ["RTMP"]}
+         :get     {:summary "get a list of videos"
+                   :handler (fn [_req]
+                              (let [files (io/file (get-video-path))
+                                    file-names (map str (.list files))]
+                                {:status 200 :body {:result file-names}}))}}]
        ] opts)
     (ring/routes
       (swagger-ui/create-swagger-ui-handler
         {:path   "/swagger"
          :config {:validatorUrl     nil
                   :operationsSorter "alpha"}})
+      (ring/create-file-handler
+        {:path "/videos"
+         :root (get-video-path)})
       (ring/create-default-handler))))
 
 (def app-cors (cors/wrap #'app cors-config))

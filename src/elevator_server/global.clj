@@ -16,7 +16,8 @@
     server))
 
 (def config {:http-api-port 3001
-             :udp-port      12345})
+             :udp-port      12345
+             :mylive-config "./mylive.yaml"})
 
 ;; https://github.com/tolitius/mount/issues/77
 (defstate conn
